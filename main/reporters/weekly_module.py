@@ -2,18 +2,16 @@ import streamlit as st
 import pandas as pd
 import datetime
 
-# data = fetch()
-def weekly(data: pd.DataFrame):
-    CURRENT_WEEK = datetime.datetime.today().isocalendar().week
+def weekly(data: pd.DataFrame, week: int):
+    weeks = []
 
-    # data = fetch()
-    # week  = datetime.date(da["Date"]).isocalendar().week
-    # data["Date"] = pd.to_datetime(data["Date"])
-    # data[
-    #     data["Date"] == 
-    # ]
+    for date in data["Date"]:
+        date = datetime.datetime.strptime(date, "%m/%d/%Y")
+
+        weeks.append(date.isocalendar().week)
+        
+    data["Week"] = weeks
     
-    
-    # data[
-    #     data["Date"]
-    # ]
+    weekly_data = data[data["Week"] == week]
+
+    return weekly_data
