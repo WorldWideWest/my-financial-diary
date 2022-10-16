@@ -19,7 +19,7 @@
             "module": "streamlit",
             "args": [
                 "run",
-                "./application.py",
+                "./main.py",
                 "--server.port",
                 "5001"
             ]
