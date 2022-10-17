@@ -2,16 +2,28 @@ import streamlit as st
 import pandas as pd
 import datetime
 
-def weekly(data: pd.DataFrame, week: int):
-    weeks = []
+@st.cache
+def categorised_data(weekly_data: pd.DataFrame) -> pd.DataFrame:
+    data_by_category = weekly_data.groupby("Category").sum()
+    return data_by_category[["Amount"]]
 
-    for date in data["Date"]:
+
+def weekly(data: pd.DataFrame, static_data: pd.DataFrame, week: int):
+    weeks = []
+    processed = data.copy()
+    data_by_category = None
+
+    for date in processed["Date"]:
         date = datetime.datetime.strptime(date, "%m/%d/%Y")
 
         weeks.append(date.isocalendar().week)
         
-    data["Week"] = weeks
+    processed["Week"] = weeks
     
-    weekly_data = data[data["Week"] == week]
+    processed = processed[processed["Week"] == week]
+    
+    if(not processed.empty):
+        data_by_category = categorised_data(processed)
 
-    return weekly_data
+    return processed, data_by_category
+
