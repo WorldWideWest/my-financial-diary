@@ -5,13 +5,27 @@ from .utils.get_data import fetch
 
 
 def run():
-    data = fetch()
+    data = fetch("data")
+
+    static_data = fetch("static-data")
 
     CURRENT_WEEK = datetime.datetime.today().isocalendar().week
 
     tabs = st.tabs(["Weekly", "Monthly", "Yarly", "Total"])
-    st.header("Welcome to your financial report")
-    
-    from .reporters.weekly_module import weekly
-    tabs[0].dataframe(weekly(data, CURRENT_WEEK))
+
+    with st.sidebar:
+        CURRENT_WEEK = st.number_input(
+            label = "Select the Week of the Year",
+            min_value = 1, max_value = 52
+        )
+
+    with tabs[0]:
+        from .reporters.weekly_module import weekly
+        weekly_data = weekly(data, static_data, CURRENT_WEEK)
+
+        st.title("Welcome to your financial report")
+
+        st.dataframe(weekly_data[0])
+        st.dataframe(weekly_data[1])
+
 

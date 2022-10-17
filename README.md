@@ -18,3 +18,11 @@ This module will show the user how much has he/she spent over the week with grap
 2. Categories where the most money is spent
 3. How much of the weekly budget has been spent
 4. How much money has he/she saved on things
+
+## Mondthly Reporting & Planning module
+
+- We want to create a monthly budget planner wehere we plann out each categry, how much money has each category to spend.
+
+- Want to anlyze the data by weeks and determine how much cash do I need weekly. For this will create the table where we will sum spendings by each week in every month.
+
+- Income statistics of the current month, where we also can see the planned savings and the actual savings.
