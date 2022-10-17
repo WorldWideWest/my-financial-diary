@@ -1,4 +1,5 @@
 import datetime
+import pandas as pd
 import streamlit as st
 
 from .utils.get_data import fetch
@@ -28,4 +29,9 @@ def run():
         st.dataframe(weekly_data[0])
         st.dataframe(weekly_data[1])
 
+    with tabs[1]:
+        from .reporters.monthly_module import monthly
+        monthly_data = monthly(data, 9)
+
+        st.dataframe(monthly_data)
 
