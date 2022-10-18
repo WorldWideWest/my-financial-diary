@@ -25,9 +25,12 @@ def weekly(data: pd.DataFrame) -> pd.DataFrame:
     grouped_transactions = filter.group_by_category(transactions)
 
     transactions_container = st.container()
-    transactions_container.subheader(f"All Transactions in the Week { WEEK } of the Year")
+    transactions_container.markdown(f"<h3 style='text-align:center;'>All Transactions in the Week { WEEK } of the Year</h3>", unsafe_allow_html = True)
     transactions_container.dataframe(transactions, use_container_width = True)
     
-    grouped_transactions_container = st.columns(2)
-    grouped_transactions_container[0].subheader(f"Grouped Transactions by Category for the Week { WEEK } of the Year")
+    grouped_transactions_container = st.columns([1, 2])
+    grouped_transactions_container[0].markdown(f"<h6 style='text-align:center;'>Grouped Transactions by Category for the Week { WEEK } of the Year</h6>", unsafe_allow_html = True)
     grouped_transactions_container[0].dataframe(grouped_transactions)
+    
+    grouped_transactions_container[1].markdown(f"<h5 style='text-align:center;'>Transactions by Day for the { WEEK } of the Year</h5>", unsafe_allow_html = True)
+    grouped_transactions_container[1].line_chart(transactions, x = "Date", y = "Amount")
