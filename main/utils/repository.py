@@ -9,7 +9,8 @@ from main.configuration import BaseConfiguration
 
 
 class Repository(BaseConfiguration):
-
+    
+    @st.cache()
     def fetch(self, index: int) ->  pd.DataFrame:
 
         credentials = ServiceAccountCredentials.from_json_keyfile_name(
@@ -19,6 +20,8 @@ class Repository(BaseConfiguration):
         data = client.open(self.TRANSACTION_SHEET).get_worksheet(index).get_all_records()
 
         return pd.DataFrame(data)
+
+    
 
 
 
