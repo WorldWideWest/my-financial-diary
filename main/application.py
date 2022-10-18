@@ -7,7 +7,6 @@ from .utils.repository import Repository
 
 repository = Repository()
 
-@st.cache
 def run():
 
     transactions_data = repository.fetch(0)
