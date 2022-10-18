@@ -1,0 +1,1 @@
+TABS = ["Weekly", "Monthly", "Yearly", "Total"]
