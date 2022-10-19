@@ -58,7 +58,8 @@ def weekly(data: pd.DataFrame) -> pd.DataFrame:
 
     grouped_transactions = filter.group_by_category(transactions)
 
-    transactions_view(transactions)
+    with st.expander("Transactions", expanded = True):
+        transactions_view(transactions)
 
     grouped_transactions_view(transactions, grouped_transactions)
 
