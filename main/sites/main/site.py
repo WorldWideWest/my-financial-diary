@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import datetime
+import datetime as dt
 
 from main.components.tab.component import tabs 
 from main.components.selectbox.component import selectbox
@@ -16,15 +16,15 @@ def main_site(data: pd.DataFrame):
         selected_month = selectbox(
             "Select the month", 
             MONTHS, 
-            datetime.datetime.today().month - 1
+            dt.datetime.today().month - 1
         )
 
         selected_week = st.selectbox(
             "Select the week",
             options = range(1, 53),
-            index = datetime.datetime.today().isocalendar().week - 1
+            index = dt.datetime.today().isocalendar().week - 1
         )
 
     with tabs_component[0]: # Weekly Site
         from main.sites.weekly.report import weekly
-        weekly(data.copy())
+        weekly(data.copy(), selected_week)
