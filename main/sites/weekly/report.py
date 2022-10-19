@@ -21,7 +21,17 @@ def grouped_transactions_view(transactions: pd.DataFrame, grouped_transactions: 
     grouped_transactions_container[0].dataframe(grouped_transactions)
     
     grouped_transactions_container[1].markdown(f"<h5 style='text-align:center;'>Transactions by Day for the { WEEK } of the Year</h5>", unsafe_allow_html = True)
-    grouped_transactions_container[1].line_chart(transactions, x = "Date", y = "Amount")
+    transactions_by_date = transactions.groupby("Date").sum()
+
+    transactions_grouped_by_date = transactions.groupby("Date").sum()
+    transactions_by_date = pd.DataFrame(
+        data = {
+            "Date": transactions_grouped_by_date.index,
+            "Amount": transactions_by_date["Amount"]
+        }
+    )
+
+    grouped_transactions_container[1].line_chart(transactions_by_date, x = "Date", y = "Amount")
 
     return grouped_transactions_container
 
