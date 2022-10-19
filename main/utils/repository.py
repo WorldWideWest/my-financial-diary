@@ -29,8 +29,8 @@ class Repository(BaseConfiguration):
             credentials = ServiceAccountCredentials.from_json_keyfile_name(
                 os.path.join(os.getcwd(), self.CREDENTIALS_FILE_NAME), self.SCOPES)
             self.__client  = gspread.authorize(credentials)
-        except:
-            print("Could not authenticate, something went wrong!")
+        except Exception as e:
+            print(f"Authentication failure: { str(e) }")
             
     @st.cache()
     def fetch(self, workbook: str, index: int) ->  pd.DataFrame:
@@ -47,7 +47,7 @@ class Repository(BaseConfiguration):
             data = self.__client.open(workbook).get_worksheet(index).get_all_records()
             return pd.DataFrame(data)
         except Exception as e:
-            print(str(e))
+            print(f"Fetch failure: { str(e) }")
 
     
 
