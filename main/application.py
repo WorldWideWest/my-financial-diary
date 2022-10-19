@@ -15,7 +15,7 @@ def run():
     transactions_data = repository.fetch(WORKBOOK, 0)
 
     from .sites.main.site import main_site
-    main_site(transactions_data)
+    main_site(transactions_data.copy(deep = True))
 
 
 
