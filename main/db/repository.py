@@ -1,11 +1,14 @@
-import os
 import pandas as pd
 import streamlit as st
 
 import gspread
+from gspread.exceptions import WorksheetNotFound
+
 from oauth2client.service_account import ServiceAccountCredentials
 
 from main.configuration import BaseConfiguration
+from main.db.models.base import BaseModel
+from main.db.models.income import IncomeModel
 
 
 class Repository(BaseConfiguration):
@@ -27,10 +30,11 @@ class Repository(BaseConfiguration):
     def __authenticate__(self):
         try:
             credentials = ServiceAccountCredentials.from_json_keyfile_name(
-                os.path.join(os.getcwd(), self.CREDENTIALS_FILE_NAME), self.SCOPES)
+                self.CREDENTIALS_FILE_NAME, self.SCOPES)
+
             self.__client  = gspread.authorize(credentials)
         except Exception as e:
-            print(f"Authentication failure: { str(e) }")
+            print(f"Authentication failure: { str(e.args) }")
             
     @st.cache()
     def fetch(self, workbook: str, index: int) ->  pd.DataFrame:
@@ -49,7 +53,38 @@ class Repository(BaseConfiguration):
         except Exception as e:
             print(f"Fetch failure: { str(e) }")
 
-    
 
+    def migrate(self, workbook_name: str, model: BaseModel, index = -1):
+        try:    
 
+            db = self.__client.open(workbook_name)
+            columns = model.columns()
 
+            workbook = self.__client.open(workbook_name)
+            if not workbook.worksheet(model.table_name):
+                workbook.add_worksheet(model.table_name)
+
+            worksheet = workbook.worksheet(model.table_name)
+            if len(worksheet.get_all_records()) == 0:
+                for x in range(len(columns)):
+                    if columns[x] != "table_name":
+                        print((1, x + 1, columns[x]))
+                        worksheet.cell(1, x + 1, columns[x])
+                
+
+            return
+        except Exception as e:
+            print(str(e.args))
+
+    # def try_get_worksheet(self, workbook:str, name: str):
+    #     try:
+    #         worksheet = None
+    #         if not self.__client.open(workbook).worksheet(name):
+    #             worksheet = self.__client.open(workbook)
+    #             worksheet.add_worksheet(name)
+
+    #         if len(worksheet.worksheet(name).get_all_records()) == 0:
+
+    #     except Exception as e:
+    #         return e
+            

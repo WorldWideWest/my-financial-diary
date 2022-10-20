@@ -37,6 +37,9 @@ def grouped_transactions_view(transactions: pd.DataFrame, grouped_transactions: 
 
 def get_required_container(transactions: pd.DataFrame):
     actual_spendings = transactions["Amount"].sum()
+    
+    # Insted of 50, we want the value for the devidable categories devided by 4 (4 stands for the weeks in the month) 
+    
     if(actual_spendings > 50):
         return st.error(f"{ actual_spendings } / { 50 }")
     return st.success(f"{ actual_spendings } / { 50 }")
