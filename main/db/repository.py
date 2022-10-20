@@ -57,34 +57,27 @@ class Repository(BaseConfiguration):
     def migrate(self, workbook_name: str, model: BaseModel, index = -1):
         try:    
 
-            db = self.__client.open(workbook_name)
             columns = model.columns()
-
             workbook = self.__client.open(workbook_name)
-            if not workbook.worksheet(model.table_name):
-                workbook.add_worksheet(model.table_name)
+
+            try_workbook = self.try_open(workbook_name, model.table_name)
+            if isinstance(try_workbook, WorksheetNotFound):
+                workbook.add_worksheet(model.table_name, 0, 0)
 
             worksheet = workbook.worksheet(model.table_name)
             if len(worksheet.get_all_records()) == 0:
                 for x in range(len(columns)):
                     if columns[x] != "table_name":
-                        print((1, x + 1, columns[x]))
-                        worksheet.cell(1, x + 1, columns[x])
+                        print(columns[x])
+                        worksheet.update_cell(1, x + 1, columns[x])
                 
 
             return
         except Exception as e:
-            print(str(e.args))
+            print(e)
 
-    # def try_get_worksheet(self, workbook:str, name: str):
-    #     try:
-    #         worksheet = None
-    #         if not self.__client.open(workbook).worksheet(name):
-    #             worksheet = self.__client.open(workbook)
-    #             worksheet.add_worksheet(name)
-
-    #         if len(worksheet.worksheet(name).get_all_records()) == 0:
-
-    #     except Exception as e:
-    #         return e
-            
+    def try_open(self, workbook: str, worksheet: str):
+        try:
+            self.__client.open(workbook).worksheet(worksheet)
+        except WorksheetNotFound as e:
+            return e
