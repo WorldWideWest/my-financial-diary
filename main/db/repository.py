@@ -57,19 +57,17 @@ class Repository(BaseConfiguration):
     def migrate(self, workbook_name: str, model: BaseModel, index = -1):
         try:    
 
-            columns = model.columns()
+            columns = [column for column in model.columns() if column != "table_name"]
             workbook = self.__client.open(workbook_name)
 
-            try_workbook = self.try_open(workbook_name, model.table_name)
-            if isinstance(try_workbook, WorksheetNotFound):
+            
+            if isinstance(self.try_open(workbook_name, model.table_name), WorksheetNotFound):
                 workbook.add_worksheet(model.table_name, 0, 0)
 
             worksheet = workbook.worksheet(model.table_name)
             if len(worksheet.get_all_records()) == 0:
-                for x in range(len(columns)):
-                    if columns[x] != "table_name":
-                        print(columns[x])
-                        worksheet.update_cell(1, x + 1, columns[x])
+                for x, value in enumerate(columns):
+                    worksheet.update_cell(1, x + 1, value)
                 
 
             return
