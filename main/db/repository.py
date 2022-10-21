@@ -51,10 +51,15 @@ class Repository(BaseConfiguration):
             data = self.__client.open(workbook).get_worksheet(index).get_all_records()
             return pd.DataFrame(data)
         except Exception as e:
-            print(f"Fetch failure: { str(e) }")
+            print(f"Fetch failure: { str(e.args) }")
 
 
-    def migrate(self, workbook_name: str, model: BaseModel, index = -1):
+    def migrate(self, workbook_name: str, model: BaseModel):
+        """
+            The `migrate` method enables you to make a model and start the migration process which will then
+            create a worksheet if it does not exists in the Workbook with all the required properties defined in
+            the model class
+        """
         try:    
 
             columns = [column for column in model.columns() if column != "table_name"]
@@ -69,10 +74,8 @@ class Repository(BaseConfiguration):
                 for x, value in enumerate(columns):
                     worksheet.update_cell(1, x + 1, value)
                 
-
-            return
         except Exception as e:
-            print(e)
+            print(e.args)
 
     def try_open(self, workbook: str, worksheet: str):
         try:
