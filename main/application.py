@@ -18,7 +18,7 @@ def run():
 
     from .sites.main.site import main_site
     main_site(transactions_data)
-
+    
 
 
 

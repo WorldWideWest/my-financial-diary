@@ -8,7 +8,6 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 from main.configuration import BaseConfiguration
 from main.db.models.base import BaseModel
-from main.db.models.income import IncomeModel
 
 
 class Repository(BaseConfiguration):
@@ -75,10 +74,10 @@ class Repository(BaseConfiguration):
                     worksheet.update_cell(1, x + 1, value)
                 
         except Exception as e:
-            print(e.args)
+            raise e.args
 
     def try_open(self, workbook: str, worksheet: str):
         try:
             self.__client.open(workbook).worksheet(worksheet)
         except WorksheetNotFound as e:
-            return e
+            return e.args
