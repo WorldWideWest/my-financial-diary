@@ -28,3 +28,9 @@ def main_site(data: pd.DataFrame):
     with tabs_component[0]: # Weekly Site
         from main.sites.weekly.report import weekly
         weekly(data.copy(), selected_week)
+
+
+    with tabs_component[1]: # Monthly Site
+        from main.sites.monthly.report import monthly
+        monthly(data.copy(), selected_month)
+
