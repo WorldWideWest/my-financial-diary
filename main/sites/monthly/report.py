@@ -55,11 +55,11 @@ def get_weekly_spendings_heatmap(data: pd.DataFrame) -> go.Heatmap:
 
     return figure
 
-def monthly(data: pd.DataFrame, selected_month: int):
+def monthly(data: pd.DataFrame, month: int):
     
     st.plotly_chart(get_weekly_spendings_heatmap(data), use_container_width = True)
 
-    grouped_by_category = filter.get_monthly_transactions(data, selected_month)
+    grouped_by_category = filter.filter_by_date(data, month = month)
 
     st.dataframe(grouped_by_category)
 

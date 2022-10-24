@@ -53,7 +53,7 @@ def planned_spendings_info_view(transactions: pd.DataFrame) -> st.columns:
 
     return planned_spending_container
 
-def weekly(data: pd.DataFrame, week: int) -> pd.DataFrame:
+def weekly(data: pd.DataFrame, year: int = None, month: int = None, week: int = None) -> pd.DataFrame:
     """
         Make sure that the data is a copy of the dataframe and not 
         the original object that is fetched from Google Sheets API.
@@ -62,19 +62,20 @@ def weekly(data: pd.DataFrame, week: int) -> pd.DataFrame:
         the pandas method copy() in front of it to make sure that the 
         DataFrame was in fact copied.
     """
-    data["Date"] = pd.to_datetime(data["Date"], format="%m/%d/%Y")
     
+    filtered = data.copy()
+
+    filtered["Date"] = pd.to_datetime(filtered["Date"], format="%m/%d/%Y")
+
+    transactions = filter.filter_by_date(filtered, year = year, month = month, week = week)
+    grouped = filter.group_by_category(transactions)
+
+    print(grouped)
     
-    transactions = data[(
-        data["Date"].dt.isocalendar().week == week
-    )]
-
-    grouped_transactions = filter.group_by_category(transactions)
-
     with st.expander("Transactions", expanded = True):
         transactions_view(transactions, week)
 
-    grouped_transactions_view(transactions, grouped_transactions, week)
+    grouped_transactions_view(transactions, grouped, week)
 
     planned_spendings_info_view(transactions)
 
