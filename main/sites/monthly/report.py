@@ -4,10 +4,13 @@ import math
 import plotly.graph_objects as go
 
 from main.static.components.data import MONTHS
+from main.utils.filter import Filter
 
-@st.cache()
-def get_weekly_spendings_heatmap(data: pd.DataFrame) -> go.Heatmap:
+filter = Filter()
 
+
+@st.experimental_memo()
+def weekly_spendings_data_filter(data: pd.DataFrame) -> dict: 
     data["Date"] = pd.to_datetime(data["Date"], format="%m/%d/%Y")
 
     processed = data.copy()
@@ -23,11 +26,17 @@ def get_weekly_spendings_heatmap(data: pd.DataFrame) -> go.Heatmap:
             
         months[MONTHS[month]] = aggregated_weeks
 
-    heatmap_object = {
+    
+    return {
         "z": months.values.tolist(),
         "x": months.columns.tolist(),
         "y": months.index.tolist()
     }
+
+
+@st.cache()
+def get_weekly_spendings_heatmap(data: pd.DataFrame) -> go.Heatmap:
+    heatmap_object = weekly_spendings_data_filter(data)
 
     hovertemplate = "Month: %{x},<br>Week: %{y},<br>Spending: %{z:.2f} KM<extra></extra>"
     texttemplate = "%{z:.2f}"
@@ -50,7 +59,10 @@ def monthly(data: pd.DataFrame, selected_month: int):
     
     st.plotly_chart(get_weekly_spendings_heatmap(data), use_container_width = True)
 
-    return
+    grouped_by_category = filter.get_monthly_transactions(data, selected_month)
+
+    st.dataframe(grouped_by_category)
+
 
 
 
