@@ -14,6 +14,8 @@ def get_figure(data: pd.DataFrame) -> px.line:
 
     fig.data[0].line.color = "#FF800B"
 
+    fig.update_layout(title_font_color = "#fff")
+
     fig.layout.plot_bgcolor = "rgba(0, 0, 0, 0)"
     fig.layout.paper_bgcolor = "rgba(0, 0, 0, 0)"
 
@@ -30,21 +32,16 @@ def transactions_view(transactions: pd.DataFrame, week: int) -> st.container:
     return transactions_container
     
 def grouped_transactions_view(transactions: pd.DataFrame, grouped_transactions: pd.DataFrame, week: int) -> st.columns:
-    grouped_transactions_container = st.columns([1, 2])
-    grouped_transactions_container[0].markdown(f"<h6 style='text-align:center;'>Grouped Transactions by Category for the Week { WEEK } of the Year</h6>", unsafe_allow_html = True)
+    grouped_transactions_container = st.columns([1, 3])
+    grouped_transactions_container[0].markdown(f"<h6 style='text-align:center;'>Grouped Transactions by Category for the Week { WEEK } of the Month</h6>", unsafe_allow_html = True)
     grouped_transactions_container[0].dataframe(grouped_transactions)
     
-    grouped_transactions_container[1].markdown(f"<h5 style='text-align:center;'>Transactions by Day for the { week } of the Year</h5>", unsafe_allow_html = True)
-
     transactions = filter.group_by_date(transactions)
-    transactions_by_date = pd.DataFrame(
-        data = {
-            "Date": transactions["Date"],
-            "Amount": transactions["Amount"]
-        }
-    )
 
-    grouped_transactions_container[1].plotly_chart(get_figure(transactions), use_container_width = True)
+    figure = get_figure(transactions)
+    figure.layout.title = f"Spendings by Day for the Week { week }"
+
+    grouped_transactions_container[1].plotly_chart(figure, use_container_width = True)
 
     return grouped_transactions_container
 
