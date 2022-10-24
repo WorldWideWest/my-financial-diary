@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import math
 import plotly.graph_objects as go
+import plotly.express as px
 
 from main.static.components.data import MONTHS
 from main.utils.filter import Filter
@@ -55,13 +56,40 @@ def get_weekly_spendings_heatmap(data: pd.DataFrame) -> go.Heatmap:
 
     return figure
 
+
+def get_figure(data: pd.DataFrame) -> px.line:
+    fig = px.line(data, x="Date", y="Amount", markers = True)
+
+    fig.data[0].line.color = "#FF800B"
+
+    fig.update_layout(title_font_color = "#fff")
+
+    fig.layout.plot_bgcolor = "rgba(0, 0, 0, 0)"
+    fig.layout.paper_bgcolor = "rgba(0, 0, 0, 0)"
+
+    fig.layout.yaxis.color = "#fff"
+    fig.layout.xaxis.color = "#fff"
+
+    hovertemplate = "<span style='color: #fff;'><span style='font-weight: 700;'>Day: %{x}</span>,<br>Amount: %{y:.2f} KM</span><extra></extra>"
+
+    fig.update_traces(hovertemplate = hovertemplate)
+
+    return fig
+
 def monthly(data: pd.DataFrame, month: int):
     
     st.plotly_chart(get_weekly_spendings_heatmap(data), use_container_width = True)
 
-    grouped_by_category = filter.filter_by_date(data, month = month)
+    transactions = filter.filter_by_date(data, month = month)
 
-    st.dataframe(grouped_by_category)
+    with st.expander("Monthly Transactions", expanded = False):
+        st.dataframe(transactions)
+
+
+    monthly_aggregation = filter.group_by_date(transactions)
+    st.plotly_chart(get_figure(monthly_aggregation), use_container_width = True)
+
+    
 
 
 

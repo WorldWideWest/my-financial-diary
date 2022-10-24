@@ -29,7 +29,7 @@ def main_site(data: pd.DataFrame):
         selected_week = st.selectbox(
             "Select the Week",
             options = range(1, 6),
-            index = math.ceil(dt.datetime.today().day / 7)
+            index = math.ceil(dt.datetime.today().day / 7) - 1
         )
 
 
