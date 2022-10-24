@@ -9,6 +9,13 @@ class Filter(object):
         grouped = data.groupby("Category").sum("Amount")
 
         return grouped[["Amount"]]
+    
+    @st.cache()
+    def group_by_date(self, data: pd.DataFrame) -> pd.DataFrame:
+        data["Date"] = pd.to_datetime(data["Date"], format="%m/%d/%Y")
+
+        grouped = data.groupby("Date", as_index = False).sum("Amount")
+        return grouped[["Date", "Amount"]]
 
     @st.cache()
     def filter_by_date(self, data: pd.DataFrame, day:int = None, week:int = None, month:int = None, year:int = None) -> pd.DataFrame:
