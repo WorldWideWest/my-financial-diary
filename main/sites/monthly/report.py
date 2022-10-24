@@ -44,7 +44,7 @@ def get_weekly_spendings_heatmap(data: pd.DataFrame) -> go.Heatmap:
 
     figure = go.Figure(data = go.Heatmap(
         heatmap_object,
-        colorscale = "magma",
+        colorscale = "YlOrRd",
         hovertemplate = hovertemplate,
         texttemplate = texttemplate,
     ))

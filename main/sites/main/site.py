@@ -9,7 +9,7 @@ from main.components.selectbox.component import selectbox
 from main.static.components.data import TABS, MONTHS
 
 
-def main_site(data: pd.DataFrame):
+def main_site(data: pd.DataFrame, planned: pd.DataFrame):
     tabs_component = tabs(TABS)
     selected_month, selected_week = None, None
 
@@ -42,3 +42,5 @@ def main_site(data: pd.DataFrame):
         from main.sites.monthly.report import monthly
         monthly(data.copy(), selected_month)
 
+        from main.sites.monthly.planner import monthly
+        monthly(planned, "November")
