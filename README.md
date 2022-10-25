@@ -26,3 +26,5 @@ This module will show the user how much has he/she spent over the week with grap
 - Want to anlyze the data by weeks and determine how much cash do I need weekly. For this will create the table where we will sum spendings by each week in every month.
 
 - Income statistics of the current month, where we also can see the planned savings and the actual savings.
+  - Bar Chart by category spent and remaining budget
+  - Weekly reporter for each category

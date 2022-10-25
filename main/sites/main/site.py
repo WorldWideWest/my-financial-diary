@@ -42,5 +42,5 @@ def main_site(data: pd.DataFrame, planned: pd.DataFrame):
         from main.sites.monthly.report import monthly
         monthly(data.copy(), selected_month)
 
-        from main.sites.monthly.planner import monthly
-        monthly(planned, "November")
+        from main.sites.monthly.planner import monthly_planner
+        monthly_planner(planned, MONTHS[selected_month])
