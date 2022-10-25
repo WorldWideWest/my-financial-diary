@@ -13,7 +13,6 @@ class BaseConfiguration:
     """
 
     SCOPES = os.environ.get("SCOPES").strip().split(",")
-    # CREDENTIALS_FILE_NAME = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
 
     CREDENTALS = {
         "type": os.environ.get("TYPE"),
