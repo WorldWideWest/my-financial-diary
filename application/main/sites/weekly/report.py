@@ -5,24 +5,14 @@ import datetime as dt
 import plotly.express as px
 
 from main.utils.filter import Filter
+from main.utils.chart import Chart
 
+chart = Chart()
 filter = Filter()
 WEEK = dt.date.today().isocalendar().week
 
-def get_figure(data: pd.DataFrame) -> px.line:
-    fig = px.line(data, x="Date", y="Amount", markers = True)
+hovertemplate = "<span style='color: #fff;'><span style='font-weight: 700;'>Day: %{x}</span>,<br>Amount: %{y:.2f} KM</span><extra></extra>"
 
-    fig.data[0].line.color = "#FF800B"
-
-    fig.update_layout(title_font_color = "#fff")
-
-    fig.layout.plot_bgcolor = "rgba(0, 0, 0, 0)"
-    fig.layout.paper_bgcolor = "rgba(0, 0, 0, 0)"
-
-    fig.layout.yaxis.color = "#fff"
-    fig.layout.xaxis.color = "#fff"
-
-    return fig
 
 def transactions_view(transactions: pd.DataFrame, week: int) -> st.container:
     transactions_container = st.container()
@@ -38,7 +28,8 @@ def grouped_transactions_view(transactions: pd.DataFrame, grouped_transactions: 
     
     transactions = filter.group_by_date(transactions)
 
-    figure = get_figure(transactions)
+    figure = chart.line(transactions, "Date", "Amount")
+    figure.update_traces(hovertemplate = hovertemplate)
     figure.layout.title = f"Spendings by Day for the Week { week }"
 
     grouped_transactions_container[1].plotly_chart(figure, use_container_width = True)

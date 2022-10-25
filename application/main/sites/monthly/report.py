@@ -6,8 +6,12 @@ import plotly.express as px
 
 from main.static.components.data import MONTHS
 from main.utils.filter import Filter
+from main.utils.chart import Chart
 
 filter = Filter()
+chart = Chart()
+
+hovertemplate = "<span style='color: #fff;'><span style='font-weight: 700;'>Day: %{x}</span>,<br>Amount: %{y:.2f} KM</span><extra></extra>"
 
 
 @st.experimental_memo()
@@ -70,7 +74,6 @@ def get_figure(data: pd.DataFrame) -> px.line:
     fig.layout.yaxis.color = "#fff"
     fig.layout.xaxis.color = "#fff"
 
-    hovertemplate = "<span style='color: #fff;'><span style='font-weight: 700;'>Day: %{x}</span>,<br>Amount: %{y:.2f} KM</span><extra></extra>"
 
     fig.update_traces(hovertemplate = hovertemplate)
 
@@ -87,7 +90,12 @@ def monthly(data: pd.DataFrame, month: int):
 
 
     monthly_aggregation = filter.group_by_date(transactions)
-    st.plotly_chart(get_figure(monthly_aggregation), use_container_width = True)
+    
+    figure = chart.line(monthly_aggregation, "Date", "Amount")
+    figure.update_traces(hovertemplate = hovertemplate)
+    figure.layout.title = f"Spendings by Day for { MONTHS[month] }"
+
+    st.plotly_chart(figure, use_container_width = True)
 
     
 
