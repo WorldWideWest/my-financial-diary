@@ -7,12 +7,8 @@ import streamlit as st
 
 class Chart:
 
-
-    def get_hovertemplate(self, x: str, y: str):
-        return 
-
     @st.experimental_memo()
-    def line(_self, data: pd.DataFrame, xaxis: str, yaxis: str, hovertemplate: str = None) -> px.line:
+    def line(_self, data: pd.DataFrame, xaxis: str, yaxis: str) -> px.line:
         fig = px.line(data, x = xaxis, y = yaxis, markers = True)
 
         fig.data[0].line.color = "#FF800B"
