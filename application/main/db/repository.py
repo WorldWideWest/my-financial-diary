@@ -28,8 +28,8 @@ class Repository(BaseConfiguration):
 
     def __authenticate__(self):
         try:
-            credentials = ServiceAccountCredentials.from_json_keyfile_name(
-                self.CREDENTIALS_FILE_NAME, self.SCOPES)
+            credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+                self.CREDENTALS, self.SCOPES)
 
             self.__client  = gspread.authorize(credentials)
         except Exception as e:
