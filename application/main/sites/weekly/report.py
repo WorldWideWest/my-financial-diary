@@ -17,21 +17,6 @@ hovertemplate = "<span style='color: #fff;'><span style='font-weight: 700;'>Day:
 
 
 class Weekly:
-        
-    def grouped_transactions_view(_self, transactions: pd.DataFrame, grouped_transactions: pd.DataFrame, week: int, month: int) -> st.columns:
-        grouped_transactions_container = st.columns([1, 3])
-        grouped_transactions_container[0].markdown(f"<h6 style='text-align:center;'>Grouped Transactions by Category for the Week { WEEK } of the Month</h6>", unsafe_allow_html = True)
-        grouped_transactions_container[0].dataframe(grouped_transactions)
-        
-        transactions = filter.group_by_date(transactions)
-
-        figure = chart.line(transactions, "Date", "Amount")
-        figure.update_traces(hovertemplate = hovertemplate)
-        figure.layout.title = f"Spendings by Day for Week { week } in { MONTHS[month] }"
-
-        grouped_transactions_container[1].plotly_chart(figure, use_container_width = True)
-
-        return grouped_transactions_container
 
     def get_required_container(_self, transactions: pd.DataFrame):
         actual_spendings = transactions["Amount"].sum()
@@ -39,8 +24,8 @@ class Weekly:
         # Insted of 50, we want the value for the devidable categories devided by 4 (4 stands for the weeks in the month) 
         
         if(actual_spendings > 50):
-            return st.error(f"{ actual_spendings } / { 50 }")
-        return st.success(f"{ actual_spendings } / { 50 }")
+            return st.error("{:.2f} / {}".format(actual_spendings, 50))
+        return st.success("{:.2f} / {}".format(actual_spendings, 50))
 
     def planned_spendings_info_view(_self, transactions: pd.DataFrame) -> st.columns:
         planned_spending_container = st.columns([3, 1])
@@ -68,7 +53,15 @@ class Weekly:
         with st.expander(f"All Transactions for Week { week } in { MONTHS[month] } ", expanded = False):
             st.dataframe(transactions, use_container_width = True)
 
-        _self.grouped_transactions_view(transactions, grouped, week, month)
+        figure = chart.line(filter.group_by_date(transactions), "Date", "Amount")
+        figure.update_traces(hovertemplate = hovertemplate)
+        figure.layout.title = f"Spendings by Day for Week { week } in { MONTHS[month] }"
+        st.plotly_chart(figure, use_container_width = True)
+
+        category = st.container()
+
+        category.markdown(f"<h6 style='text-align:left;'>Grouped Transactions by Category for { week } in { MONTHS[month] }</h6>", unsafe_allow_html = True)
+        category.dataframe(grouped)
 
         _self.planned_spendings_info_view(transactions)
 
