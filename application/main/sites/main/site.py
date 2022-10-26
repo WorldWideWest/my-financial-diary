@@ -14,7 +14,7 @@ def main_site(data: pd.DataFrame, planned: pd.DataFrame):
     selected_month, selected_week = None, None
 
     with st.sidebar:
-        select_year = st.selectbox(
+        selected_year = st.selectbox(
             "Select the Year",
             options = range(2022, 2024),
             index = 0
@@ -35,12 +35,11 @@ def main_site(data: pd.DataFrame, planned: pd.DataFrame):
 
     with tabs_component[0]: # Weekly Site
         from main.sites.weekly.report import weekly
-        weekly(data.copy(), select_year, selected_month, selected_week)
+        weekly(data.copy(), selected_year, selected_month, selected_week)
 
 
     with tabs_component[1]: # Monthly Site
-        from main.sites.monthly.report import monthly
-        monthly(data.copy(), selected_month)
+        from main.sites.monthly.report import Monthly
+        monthly = Monthly()
+        monthly.report(data.copy(), selected_month, selected_year)
 
-        from main.sites.monthly.planner import monthly_planner
-        monthly_planner(planned, MONTHS[selected_month])
