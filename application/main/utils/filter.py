@@ -4,21 +4,21 @@ import math
 
 class Filter(object):
 
-    @st.cache()
-    def group_by_category(self, data: pd.DataFrame) -> pd.DataFrame:
+    @st.experimental_memo()
+    def group_by_category(_self, data: pd.DataFrame) -> pd.DataFrame:
         grouped = data.groupby("Category").sum("Amount")
 
         return grouped[["Amount"]]
     
-    @st.cache()
-    def group_by_date(self, data: pd.DataFrame) -> pd.DataFrame:
+    @st.experimental_memo()
+    def group_by_date(_self, data: pd.DataFrame) -> pd.DataFrame:
         data["Date"] = pd.to_datetime(data["Date"], format="%m/%d/%Y")
 
         grouped = data.groupby("Date", as_index = False).sum("Amount")
         return grouped[["Date", "Amount"]]
 
-    @st.cache()
-    def filter_by_date(self, data: pd.DataFrame, day:int = None, week:int = None, month:int = None, year:int = None) -> pd.DataFrame:
+    @st.experimental_memo()
+    def filter_by_date(_self, data: pd.DataFrame, day:int = None, week:int = None, month:int = None, year:int = None) -> pd.DataFrame:
         data["Date"] = pd.to_datetime(data["Date"], format="%m/%d/%Y")
         data["Week"] = pd.to_numeric(data["Date"].dt.day / 7).apply(lambda x: math.ceil(x))
         
@@ -36,7 +36,7 @@ class Filter(object):
 
         return data
 
-    @st.cache()
-    def get_monthly_transactions(self, data: pd.DataFrame, month: int) -> float:
+    @st.experimental_memo()
+    def get_monthly_transactions(_self, data: pd.DataFrame, month: int) -> float:
         data["Date"] = pd.to_datetime(data["Date"], format="%m/%d/%Y")
         return data[(data["Date"].dt.month == month)]

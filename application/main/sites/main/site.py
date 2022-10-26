@@ -39,8 +39,7 @@ def main_site(data: pd.DataFrame, planned: pd.DataFrame):
 
 
     with tabs_component[1]: # Monthly Site
-        from main.sites.monthly.report import monthly
-        monthly(data.copy(), selected_month)
+        from main.sites.monthly.report import Monthly
+        monthly = Monthly()
+        monthly.report(data.copy(), selected_month)
 
-        from main.sites.monthly.planner import monthly_planner
-        monthly_planner(planned, MONTHS[selected_month])
