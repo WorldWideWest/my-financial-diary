@@ -12,6 +12,7 @@ filter = Filter()
 chart = Chart()
 
 hovertemplate = "<span style='color: #fff;'><span style='font-weight: 700;'>Day: %{x}</span>,<br>Amount: %{y:.2f} KM</span><extra></extra>"
+heatmap_hover_template = "<span style='background-color: #fff; color: #001024;'>Month: %{x},<br>Week: %{y},<br>Spending: %{z:.2f} KM</span><extra></extra>"
 
 class Monthly:
 
@@ -38,10 +39,9 @@ class Monthly:
 
 
     @st.experimental_memo()
-    def get_weekly_spendings_heatmap(_self, data: pd.DataFrame) -> go.Heatmap:
+    def get_weekly_spendings_heatmap(_self, data: pd.DataFrame) -> go.Figure:
         heatmap_object = _self.weekly_spendings_data_filter(data)
 
-        hovertemplate = "Month: %{x},<br>Week: %{y},<br>Spending: %{z:.2f} KM<extra></extra>"
         texttemplate = "%{z:.2f}"
 
         figure = go.Figure(data = go.Heatmap(
@@ -49,20 +49,27 @@ class Monthly:
             colorscale = "YlOrRd",
             hovertemplate = hovertemplate,
             texttemplate = texttemplate,
+            xgap = 2,
+            ygap = 2
         ))
 
         figure.update_layout(
             xaxis = dict(showgrid = False),
-            yaxis = dict(showgrid = False)
+            yaxis = dict(showgrid = False),
+            hoverlabel = dict(bgcolor = "white"),
         )
 
         return figure
 
 
     @st.experimental_memo()
-    def report(_self, data: pd.DataFrame, month: int):
+    def report(_self, data: pd.DataFrame, month: int, year: int):
         
-        st.plotly_chart(_self.get_weekly_spendings_heatmap(data), use_container_width = True)
+        heatmap = _self.get_weekly_spendings_heatmap(data)
+        heatmap.layout.title = f"Spendings for each Week in the Month for { year }"
+        heatmap.update_traces(hovertemplate = heatmap_hover_template)
+
+        st.plotly_chart(heatmap, use_container_width = True)
 
         transactions = filter.filter_by_date(data, month = month)
 
