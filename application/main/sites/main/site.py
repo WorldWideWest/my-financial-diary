@@ -34,8 +34,9 @@ def main_site(data: pd.DataFrame, planned: pd.DataFrame):
 
 
     with tabs_component[0]: # Weekly Site
-        from main.sites.weekly.report import weekly
-        weekly(data.copy(), selected_year, selected_month, selected_week)
+        from main.sites.weekly.report import Weekly
+        weekly = Weekly()
+        weekly.report(data.copy(), selected_year, selected_month, selected_week)
 
 
     with tabs_component[1]: # Monthly Site
