@@ -70,10 +70,18 @@ class Monthly:
 
 
     @st.experimental_memo()
-    def planner(_self, month: int, year: int):
-        data = _self._repository.fetch(workbook = _self.workbook, index = 1) # Planned spendings for 2022
-
+    def planner(_self, transactions: pd.DataFrame, month: int, year: int):
+        data = _self._repository.fetch(_self.workbook, 1) # Planned spendings for 2022
         planned = _self._filter.planned_monthly_data(data, MONTHS[month])
+        
+        planned["Spent"] = 0
+        total = 0
+
+        for category in data["Categories"]:
+            total = transactions[transactions["Category"] == category]["Amount"].sum()
+            index = planned.index[planned["Categories"] == category][0]
+            
+            planned.at[index, "Spent"] = total
 
         st.dataframe(planned, use_container_width = True)
 
@@ -81,7 +89,7 @@ class Monthly:
 
     @st.experimental_memo()
     def report(_self, month: int, year: int):
-        data = _self._repository.fetch(workbook = _self.workbook, index = 0)
+        data = _self._repository.fetch(_self.workbook, 0)
 
         heatmap = _self.get_weekly_spendings_heatmap(data)
         heatmap.layout.title = f"Spendings for each Week in the Month for { year }"
@@ -89,12 +97,12 @@ class Monthly:
 
         st.plotly_chart(heatmap, use_container_width = True)
 
-        transactions = _self._filter.filter_by_date(data = data, month = month)
+        transactions = _self._filter.filter_by_date(data, month = month)
 
         with st.expander(f"Transactions for { MONTHS[month] }", expanded = False):
             st.dataframe(transactions)
 
-        monthly_aggregation = _self._filter.group_by_date(data = transactions)
+        monthly_aggregation = _self._filter.group_by_date(transactions)
         
         figure = chart.line(monthly_aggregation, "Date", "Amount")
         figure.update_traces(hovertemplate = hovertemplate)
@@ -102,7 +110,7 @@ class Monthly:
 
         st.plotly_chart(figure, use_container_width = True)
 
-        _self.planner(month, year)
+        _self.planner(transactions, month, year)
         
 
 
