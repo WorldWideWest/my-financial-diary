@@ -69,9 +69,18 @@ class Monthly:
         return figure
 
 
+    def monthly_spendings_container(_self, data: pd.DataFrame, month: int):
+        planned = data[data["Devidable"] == "FALSE"][MONTHS[month]].sum()
+        actual = data[data["Devidable"] == "FALSE"]["Spent"].sum()
+
+        if actual > planned:
+            return st.error("{:.2f} / {:.2f}".format(actual, planned))
+        return st.success("{:.2f} / {:.2f}".format(actual, planned))
+
+
     @st.experimental_memo()
     def planner(_self, transactions: pd.DataFrame, month: int, year: int):
-        data = _self._repository.fetch(_self.workbook, 1) # Planned spendings for 2022
+        data = _self._repository.fetch(_self.workbook, 1)
         planned = _self._filter.planned_monthly_data(data, MONTHS[month])
         
         planned["Spent"] = 0
@@ -85,7 +94,12 @@ class Monthly:
 
         st.dataframe(planned, use_container_width = True)
 
+        spendings = st.columns([3, 1])
 
+        spendings[0].info(f"Spendings in { MONTHS[month] } for the monthly categories")
+        with spendings[1]:
+            _self.monthly_spendings_container(planned, month)
+                
 
     @st.experimental_memo()
     def report(_self, month: int, year: int):
