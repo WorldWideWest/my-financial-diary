@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import math
@@ -7,8 +8,9 @@ import plotly.express as px
 from main.static.components.data import MONTHS
 from main.utils.filter import Filter
 from main.utils.chart import Chart
+from main.db.repository import Repository
 
-filter = Filter()
+
 chart = Chart()
 
 hovertemplate = "<span style='color: #fff;'><span style='font-weight: 700;'>Day: %{x}</span>,<br>Amount: %{y:.2f} KM</span><extra></extra>"
@@ -16,13 +18,18 @@ heatmap_hover_template = "<span style='background-color: #fff; color: #001024;'>
 
 class Monthly:
 
+    def __init__(_self, repository: Repository, filter: Filter, workbook: str) -> None:
+        _self.workbook = workbook
+        _self._repository = repository
+        _self._filter = filter
+
     @st.experimental_memo()
     def weekly_spendings_data_filter(_self, data: pd.DataFrame) -> dict: 
-        processed = filter.filter_by_date(data)
+        processed = _self._filter.filter_by_date(data = data)
         processed["Month"] = processed["Date"].dt.month_name()
 
         months = pd.DataFrame()
-
+    
         for month in range(1, 13):
 
             aggregated_weeks = processed[processed["Month"] == MONTHS[month]].groupby("Week").sum("Amount")
@@ -63,20 +70,31 @@ class Monthly:
 
 
     @st.experimental_memo()
-    def report(_self, data: pd.DataFrame, month: int, year: int):
-        
+    def planner(_self, month: int, year: int):
+        data = _self._repository.fetch(workbook = _self.workbook, index = 1) # Planned spendings for 2022
+
+        planned = _self._filter.planned_monthly_data(data, MONTHS[month])
+
+        st.dataframe(planned, use_container_width = True)
+
+
+
+    @st.experimental_memo()
+    def report(_self, month: int, year: int):
+        data = _self._repository.fetch(workbook = _self.workbook, index = 0)
+
         heatmap = _self.get_weekly_spendings_heatmap(data)
         heatmap.layout.title = f"Spendings for each Week in the Month for { year }"
         heatmap.update_traces(hovertemplate = heatmap_hover_template)
 
         st.plotly_chart(heatmap, use_container_width = True)
 
-        transactions = filter.filter_by_date(data, month = month)
+        transactions = _self._filter.filter_by_date(data = data, month = month)
 
         with st.expander(f"Transactions for { MONTHS[month] }", expanded = False):
             st.dataframe(transactions)
 
-        monthly_aggregation = filter.group_by_date(transactions)
+        monthly_aggregation = _self._filter.group_by_date(data = transactions)
         
         figure = chart.line(monthly_aggregation, "Date", "Amount")
         figure.update_traces(hovertemplate = hovertemplate)
@@ -84,6 +102,7 @@ class Monthly:
 
         st.plotly_chart(figure, use_container_width = True)
 
+        _self.planner(month, year)
         
 
 
