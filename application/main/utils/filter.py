@@ -40,3 +40,7 @@ class Filter(object):
     def get_monthly_transactions(_self, data: pd.DataFrame, month: int) -> float:
         data["Date"] = pd.to_datetime(data["Date"], format="%m/%d/%Y")
         return data[(data["Date"].dt.month == month)]
+
+    
+    def planned_monthly_data(_self, data: pd.DataFrame, month: str) -> pd.DataFrame:
+        return data[["Categories", "Devidable", month]]

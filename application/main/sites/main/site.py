@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import datetime as dt
@@ -5,8 +6,12 @@ import math
 
 from main.components.tab.component import tabs 
 from main.components.selectbox.component import selectbox
+from main.db.repository import Repository
+from main.utils.filter import Filter
 
 from main.static.components.data import TABS, MONTHS
+
+WORKBOOK = os.environ.get("WORKBOOK")
 
 
 def main_site(data: pd.DataFrame, planned: pd.DataFrame):
@@ -41,6 +46,6 @@ def main_site(data: pd.DataFrame, planned: pd.DataFrame):
 
     with tabs_component[1]: # Monthly Site
         from main.sites.monthly.report import Monthly
-        monthly = Monthly()
-        monthly.report(data.copy(), selected_month, selected_year)
+        monthly = Monthly(Repository(), Filter(), WORKBOOK)
+        monthly.report(selected_month, selected_year)
 

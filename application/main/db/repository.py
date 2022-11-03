@@ -31,7 +31,7 @@ class Repository(BaseConfiguration):
             credentials = ServiceAccountCredentials.from_json_keyfile_dict(
                 _self.CREDENTALS, _self.SCOPES)
 
-            _self.__client  = gspread.authorize(credentials)
+            _self.__client = gspread.authorize(credentials)
         except Exception as e:
             print(f"Authentication failure: { str(e.args) }")
             
