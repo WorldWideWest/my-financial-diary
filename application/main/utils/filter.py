@@ -41,6 +41,9 @@ class Filter(object):
         data["Date"] = pd.to_datetime(data["Date"], format="%m/%d/%Y")
         return data[(data["Date"].dt.month == month)]
 
-    
-    def planned_monthly_data(_self, data: pd.DataFrame, month: str) -> pd.DataFrame:
-        return data[["Categories", "Devidable", month]]
+    @st.experimental_memo()
+    def planned_monthly_data(_self, data: pd.DataFrame, month: str, devidable: bool) -> pd.DataFrame:
+        if devidable:
+            return data[data["Devidable"] == "TRUE"] [["Categories", month]]
+        return data[data["Devidable"] == "FALSE"] [["Categories", month]]
+        

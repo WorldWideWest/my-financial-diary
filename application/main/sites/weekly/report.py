@@ -44,6 +44,7 @@ class Weekly:
 
     def report(_self, year: int = None, month: int = None, week: int = None) -> pd.DataFrame:
         data = _self.__repository.fetch(_self.__workbook, 0)
+        planned = _self.__repository.fetch(_self.__workbook, 1)
 
         transactions = _self.__filter.filter_by_date(data, year = year, month = month, week = week)
         grouped = _self.__filter.group_by_category(transactions)
@@ -60,6 +61,11 @@ class Weekly:
         category.markdown(f"<h6 style='text-align:left;'>Grouped Transactions by Category for { week } in { MONTHS[month] }</h6>", unsafe_allow_html = True)
         category.dataframe(grouped)
 
+        planned = _self.__filter.planned_monthly_data(planned, MONTHS[month], True)
+        st.dataframe(planned)
+
         _self.planned_spendings_info_view(transactions)
+
+
 
 
