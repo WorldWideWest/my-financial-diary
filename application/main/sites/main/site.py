@@ -17,22 +17,21 @@ WORKBOOK = os.environ.get("WORKBOOK")
 
 def main_site(data: pd.DataFrame, planned: pd.DataFrame):
     tabs_component = tabs(TABS)
-    selected_month, selected_week = None, None
 
     with st.sidebar:
-        selected_year = st.selectbox(
+        year = st.selectbox(
             "Select the Year",
             options = range(2022, 2024),
             index = 0
         )
 
-        selected_month = selectbox(
+        month = selectbox(
             "Select the Month", 
             MONTHS, 
             dt.datetime.today().month - 1
         )
 
-        selected_week = st.selectbox(
+        week = st.selectbox(
             "Select the Week",
             options = range(1, 6),
             index = math.ceil(dt.datetime.today().day / 7) - 1
@@ -42,11 +41,11 @@ def main_site(data: pd.DataFrame, planned: pd.DataFrame):
     with tabs_component[0]: # Weekly Site
         from main.sites.weekly.report import Weekly
         weekly = Weekly(Repository(), Filter(), Chart(), WORKBOOK)
-        weekly.report(data.copy(), selected_year, selected_month, selected_week)
+        weekly.report(year, month, week)
 
 
     with tabs_component[1]: # Monthly Site
         from main.sites.monthly.report import Monthly
         monthly = Monthly(Repository(), Filter(), Chart(), WORKBOOK)
-        monthly.report(selected_month, selected_year)
+        monthly.report(month, year)
 
