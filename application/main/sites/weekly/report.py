@@ -6,6 +6,7 @@ import plotly.express as px
 
 from main.utils.filter import Filter
 from main.utils.chart import Chart
+from main.db.repository import Repository
 
 from main.static.components.data import MONTHS
 
@@ -18,10 +19,15 @@ hovertemplate = "<span style='color: #fff;'><span style='font-weight: 700;'>Day:
 
 class Weekly:
 
+    def __init__(_self, repository: Repository, filter: Filter, chart: Chart, workbook: str):
+        _self.__repository = repository
+        _self.__filter = filter
+        _self.__chart = chart
+        _self.__workbook = workbook
+        
+
     def get_required_container(_self, transactions: pd.DataFrame):
         actual_spendings = transactions["Amount"].sum()
-        
-        # Insted of 50, we want the value for the devidable categories devided by 4 (4 stands for the weeks in the month) 
         
         if(actual_spendings > 50):
             return st.error("{:.2f} / {}".format(actual_spendings, 50))
@@ -37,23 +43,15 @@ class Weekly:
         return planned_spending_container
 
     def report(_self, data: pd.DataFrame, year: int = None, month: int = None, week: int = None) -> pd.DataFrame:
-        """
-            Make sure that the data is a copy of the dataframe and not 
-            the original object that is fetched from Google Sheets API.
+        data = _self.__repository.fetch(_self.__workbook, 0)
 
-            To do that on passing the `data` argument to the function add
-            the pandas method copy() in front of it to make sure that the 
-            DataFrame was in fact copied.
-        """
-        
-
-        transactions = filter.filter_by_date(data, year = year, month = month, week = week)
-        grouped = filter.group_by_category(transactions)
+        transactions = _self.__filter.filter_by_date(data, year = year, month = month, week = week)
+        grouped = _self.__filter.group_by_category(transactions)
 
         with st.expander(f"All Transactions for Week { week } in { MONTHS[month] } ", expanded = False):
             st.dataframe(transactions, use_container_width = True)
 
-        figure = chart.line(filter.group_by_date(transactions), "Date", "Amount")
+        figure = _self.__chart.line(_self.__filter.group_by_date(transactions), "Date", "Amount")
         figure.update_traces(hovertemplate = hovertemplate)
         figure.layout.title = f"Spendings by Day for Week { week } in { MONTHS[month] }"
         st.plotly_chart(figure, use_container_width = True)

@@ -8,6 +8,7 @@ from main.components.tab.component import tabs
 from main.components.selectbox.component import selectbox
 from main.db.repository import Repository
 from main.utils.filter import Filter
+from main.utils.chart import Chart
 
 from main.static.components.data import TABS, MONTHS
 
@@ -40,12 +41,12 @@ def main_site(data: pd.DataFrame, planned: pd.DataFrame):
 
     with tabs_component[0]: # Weekly Site
         from main.sites.weekly.report import Weekly
-        weekly = Weekly()
+        weekly = Weekly(Repository(), Filter(), Chart(), WORKBOOK)
         weekly.report(data.copy(), selected_year, selected_month, selected_week)
 
 
     with tabs_component[1]: # Monthly Site
         from main.sites.monthly.report import Monthly
-        monthly = Monthly(Repository(), Filter(), WORKBOOK)
+        monthly = Monthly(Repository(), Filter(), Chart(), WORKBOOK)
         monthly.report(selected_month, selected_year)
 
