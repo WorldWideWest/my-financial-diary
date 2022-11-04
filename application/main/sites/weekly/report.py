@@ -42,7 +42,7 @@ class Weekly:
 
         return planned_spending_container
 
-    def report(_self, data: pd.DataFrame, year: int = None, month: int = None, week: int = None) -> pd.DataFrame:
+    def report(_self, year: int = None, month: int = None, week: int = None) -> pd.DataFrame:
         data = _self.__repository.fetch(_self.__workbook, 0)
 
         transactions = _self.__filter.filter_by_date(data, year = year, month = month, week = week)
@@ -57,7 +57,6 @@ class Weekly:
         st.plotly_chart(figure, use_container_width = True)
 
         category = st.container()
-
         category.markdown(f"<h6 style='text-align:left;'>Grouped Transactions by Category for { week } in { MONTHS[month] }</h6>", unsafe_allow_html = True)
         category.dataframe(grouped)
 
