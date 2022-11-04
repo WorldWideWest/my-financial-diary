@@ -1,9 +1,6 @@
-import os
 import streamlit as st
 import pandas as pd
-import math
 import plotly.graph_objects as go
-import plotly.express as px
 
 from main.static.components.data import MONTHS
 from main.utils.filter import Filter
@@ -11,21 +8,20 @@ from main.utils.chart import Chart
 from main.db.repository import Repository
 
 
-chart = Chart()
-
 hovertemplate = "<span style='color: #fff;'><span style='font-weight: 700;'>Day: %{x}</span>,<br>Amount: %{y:.2f} KM</span><extra></extra>"
 heatmap_hover_template = "<span style='background-color: #fff; color: #001024;'>Month: %{x},<br>Week: %{y},<br>Spending: %{z:.2f} KM</span><extra></extra>"
 
 class Monthly:
 
-    def __init__(_self, repository: Repository, filter: Filter, workbook: str) -> None:
-        _self.workbook = workbook
-        _self._repository = repository
-        _self._filter = filter
+    def __init__(_self, repository: Repository, filter: Filter, chart: Chart, workbook: str) -> None:
+        _self.__workbook = workbook
+        _self.__repository = repository
+        _self.__filter = filter
+        _self.__chart = chart
 
     @st.experimental_memo()
     def weekly_spendings_data_filter(_self, data: pd.DataFrame) -> dict: 
-        processed = _self._filter.filter_by_date(data = data)
+        processed = _self.__filter.filter_by_date(data = data)
         processed["Month"] = processed["Date"].dt.month_name()
 
         months = pd.DataFrame()
@@ -80,8 +76,8 @@ class Monthly:
 
     @st.experimental_memo()
     def planner(_self, transactions: pd.DataFrame, month: int, year: int):
-        data = _self._repository.fetch(_self.workbook, 1)
-        planned = _self._filter.planned_monthly_data(data, MONTHS[month])
+        data = _self.__repository.fetch(_self.__workbook, 1)
+        planned = _self.__filter.planned_monthly_data(data, MONTHS[month])
         
         planned["Spent"] = 0
         total = 0
@@ -103,7 +99,7 @@ class Monthly:
 
     @st.experimental_memo()
     def report(_self, month: int, year: int):
-        data = _self._repository.fetch(_self.workbook, 0)
+        data = _self.__repository.fetch(_self.__workbook, 0)
 
         heatmap = _self.get_weekly_spendings_heatmap(data)
         heatmap.layout.title = f"Spendings for each Week in the Month for { year }"
@@ -111,14 +107,14 @@ class Monthly:
 
         st.plotly_chart(heatmap, use_container_width = True)
 
-        transactions = _self._filter.filter_by_date(data, month = month)
+        transactions = _self.__filter.filter_by_date(data, month = month)
 
         with st.expander(f"Transactions for { MONTHS[month] }", expanded = False):
             st.dataframe(transactions)
 
-        monthly_aggregation = _self._filter.group_by_date(transactions)
+        monthly_aggregation = _self.__filter.group_by_date(transactions)
         
-        figure = chart.line(monthly_aggregation, "Date", "Amount")
+        figure = _self.__chart.line(monthly_aggregation, "Date", "Amount")
         figure.update_traces(hovertemplate = hovertemplate)
         figure.layout.title = f"Spendings by Day in { MONTHS[month] }"
 
