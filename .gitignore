@@ -8,6 +8,8 @@ __pycache__/
 
 # json credentials file
 credentials.json
+experimenting/
+*.csv
 
 # Distribution / packaging
 .Python
