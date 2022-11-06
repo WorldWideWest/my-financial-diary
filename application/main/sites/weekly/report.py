@@ -26,19 +26,20 @@ class Weekly:
         _self.__workbook = workbook
         
 
-    def get_required_container(_self, transactions: pd.DataFrame):
-        actual_spendings = transactions["Amount"].sum()
-        
-        if(actual_spendings > 50):
-            return st.error("{:.2f} / {}".format(actual_spendings, 50))
-        return st.success("{:.2f} / {}".format(actual_spendings, 50))
+    def get_required_container(_self, data: pd.DataFrame, month: str):
+        planned = data[month].sum()
+        actual = data["Spent"].sum()
 
-    def planned_spendings_info_view(_self, transactions: pd.DataFrame) -> st.columns:
+        text = "{:.2f} / {:.2f}".format(actual, planned)
+
+        return st.error(text) if actual > planned else st.success(text)
+
+    def planned_spendings_info_view(_self, data: pd.DataFrame, month: str) -> st.columns:
         planned_spending_container = st.columns([3, 1])
         planned_spending_container[0].info(f"Planned and Actual spendings for the week { WEEK }")
 
         with planned_spending_container[1]:
-            _self.get_required_container(transactions)
+            _self.get_required_container(data, month)
 
         return planned_spending_container
 
@@ -64,7 +65,7 @@ class Weekly:
         planned = _self.__filter.spendings_statistics(planned, transactions, MONTHS[month], True)
         st.dataframe(planned)
 
-        _self.planned_spendings_info_view(transactions)
+        _self.planned_spendings_info_view(planned, MONTHS[month])
 
 
 
