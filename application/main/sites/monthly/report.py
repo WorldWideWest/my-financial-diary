@@ -68,39 +68,16 @@ class Monthly:
     def monthly_spendings_container(_self, data: pd.DataFrame, month: int):
         planned = data[MONTHS[month]].sum()
         actual = data["Spent"].sum()
-
-        if actual > planned:
-            return st.error("{:.2f} / {:.2f}".format(actual, planned))
-        return st.success("{:.2f} / {:.2f}".format(actual, planned))
-
-
-    def try_access_index(_self, index):
-        try:
-            index[0:1][0]
-        except IndexError as e:
-            return e
+        
+        text = "{:.2f} / {:.2f}".format(actual, planned)
+        
+        return st.error(text) if actual > planned else st.success(text)
 
     @st.experimental_memo()
     def planner(_self, transactions: pd.DataFrame, month: int, year: int):
         data = _self.__repository.fetch(_self.__workbook, 1)
 
-        planned = _self.__filter.planned_monthly_data(data, MONTHS[month], False)
-        
-        
-
-        planned["Spent"] = 0
-        total = 0
-
-        for category in data["Categories"]:
-            total = transactions[transactions["Category"] == category]["Amount"].sum()
-            index = planned[planned["Categories"] == category].index
-            
-            if not isinstance(_self.try_access_index(index), IndexError):
-                index = index[0]
-                planned.loc[index, "Spent"] = total
-
-
-            
+        planned = _self.__filter.spendings_statistics(data, transactions, MONTHS[month],  False)
 
         st.dataframe(planned, use_container_width = True)
 

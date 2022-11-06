@@ -61,7 +61,7 @@ class Weekly:
         category.markdown(f"<h6 style='text-align:left;'>Grouped Transactions by Category for { week } in { MONTHS[month] }</h6>", unsafe_allow_html = True)
         category.dataframe(grouped)
 
-        planned = _self.__filter.planned_monthly_data(planned, MONTHS[month], True)
+        planned = _self.__filter.spendings_statistics(planned, transactions, MONTHS[month], True)
         st.dataframe(planned)
 
         _self.planned_spendings_info_view(transactions)
