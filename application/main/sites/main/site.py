@@ -45,8 +45,8 @@ def main_site(data: pd.DataFrame, planned: pd.DataFrame):
         weekly.set_year(year)
         weekly.set_month(month)
         weekly.set_week(week)
-        
-        weekly.report()
+
+        weekly.process()
 
 
     with tabs_component[1]: # Monthly Site

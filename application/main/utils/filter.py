@@ -55,7 +55,7 @@ class Filter(object):
         data = planned.copy()
         data["Devidable"] = data["Devidable"].replace({"TRUE": True, "FALSE": False})
 
-        if not isinstance(_self.try_get_column(data, month), IndexError):
+        if not isinstance(_self.try_get_column(data, month), KeyError):
             data = data[data["Devidable"] == devidable]
             data = data[["Categories", month]]
 
@@ -80,5 +80,5 @@ class Filter(object):
     def try_get_column(_self, data: pd.DataFrame, month: str):
         try:
             data[month]
-        except IndexError as e:
+        except KeyError as e:
             return e
