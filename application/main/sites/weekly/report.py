@@ -10,10 +10,7 @@ from main.db.repository import Repository
 
 from main.static.components.data import MONTHS
 
-chart = Chart()
-filter = Filter()
 
-hovertemplate = "<span style='color: #fff;'><span style='font-weight: 700;'>Day: %{x}</span>,<br>Amount: %{y:.2f} KM</span><extra></extra>"
 
 
 class Weekly:
@@ -38,13 +35,13 @@ class Weekly:
 
     def set_week(_self, week: int):
         _self.week = week
-
+    
     def get_data(_self):
         _self.data = _self.__repository.fetch(_self.__workbook, 0)
         _self.planned = _self.__repository.fetch(_self.__workbook, 1)
 
     def get_required_container(_self, data: pd.DataFrame) -> dict:
-        text = "No data to show"
+        text = ""
 
         if not isinstance(_self.__filter.try_get_column(data, _self.month_name) , KeyError):
             planned = data[_self.month_name].sum()
@@ -75,7 +72,10 @@ class Weekly:
         return expander
 
     def get_spendings_by_day_chart(_self, transactions: pd.DataFrame):
+        hovertemplate = "<span style='color: #fff;'><span style='font-weight: 700;'>Day: %{x}</span>,<br>Amount: %{y:.2f} KM</span><extra></extra>"
+
         figure = _self.__chart.line(transactions, "Date", "Amount")
+
         figure.update_traces(hovertemplate = hovertemplate)
         figure.layout.title = f"Spendings by Day for Week { _self.week } in { _self.month_name }"
 

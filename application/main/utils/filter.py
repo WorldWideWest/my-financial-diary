@@ -20,7 +20,7 @@ class Filter(object):
     @st.experimental_memo()
     def filter_by_date(_self, data: pd.DataFrame, day:int = None, week:int = None, month:int = None, year:int = None) -> pd.DataFrame:
         data["Date"] = pd.to_datetime(data["Date"], format="%m/%d/%Y")
-        data["Week"] = pd.to_numeric(data["Date"].dt.day / 7).apply(lambda x: math.ceil(x))
+        data["Week"] = pd.to_numeric(data["Date"].dt.day  / 7).apply(lambda x: math.ceil(x))
         
         if year:
             data = data[data["Date"].dt.year == year]
@@ -57,6 +57,10 @@ class Filter(object):
 
         if not isinstance(_self.try_get_column(data, month), KeyError):
             data = data[data["Devidable"] == devidable]
+
+            if devidable:
+                data[month] = data[month].apply(lambda x: x / 5) 
+
             data = data[["Categories", month]]
 
             data["Spent"], total = 0, 0
