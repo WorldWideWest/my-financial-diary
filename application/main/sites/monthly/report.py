@@ -1,103 +1,118 @@
 import streamlit as st
 import pandas as pd
-import math
 import plotly.graph_objects as go
-import plotly.express as px
 
 from main.static.components.data import MONTHS
 from main.utils.filter import Filter
 from main.utils.chart import Chart
+from main.db.repository import Repository
 
-filter = Filter()
-chart = Chart()
 
 hovertemplate = "<span style='color: #fff;'><span style='font-weight: 700;'>Day: %{x}</span>,<br>Amount: %{y:.2f} KM</span><extra></extra>"
+heatmap_hover_template = "<span style='background-color: #fff; color: #001024;'>Month: %{x},<br>Week: %{y},<br>Spending: %{z:.2f} KM</span><extra></extra>"
 
+class Monthly:
 
-@st.experimental_memo()
-def weekly_spendings_data_filter(data: pd.DataFrame) -> dict: 
-    data["Date"] = pd.to_datetime(data["Date"], format="%m/%d/%Y")
+    def __init__(_self, repository: Repository, filter: Filter, chart: Chart, workbook: str) -> None:
+        _self.__workbook = workbook
+        _self.__repository = repository
+        _self.__filter = filter
+        _self.__chart = chart
 
-    processed = data.copy()
-    processed["Month"] = processed["Date"].dt.month_name()
-    processed["Week"] = pd.to_numeric(processed["Date"].dt.day / 7).apply(lambda x: math.ceil(x))
+    @st.experimental_memo()
+    def weekly_spendings_data_filter(_self, data: pd.DataFrame) -> dict: 
+        processed = _self.__filter.filter_by_date(data = data)
+        processed["Month"] = processed["Date"].dt.month_name()
 
-    months = pd.DataFrame()
-
-    for month in range(1, 13):
-
-        aggregated_weeks = processed[processed["Month"] == MONTHS[month]].groupby("Week").sum("Amount")
-        aggregated_weeks = pd.Series(aggregated_weeks["Amount"].tolist(), index = aggregated_weeks.index)
-            
-        months[MONTHS[month]] = aggregated_weeks
-
+        months = pd.DataFrame()
     
-    return {
-        "z": months.values.tolist(),
-        "x": months.columns.tolist(),
-        "y": months.index.tolist()
-    }
+        for month in range(1, 13):
+
+            aggregated_weeks = processed[processed["Month"] == MONTHS[month]].groupby("Week").sum("Amount")
+            aggregated_weeks = pd.Series(aggregated_weeks["Amount"].tolist(), index = aggregated_weeks.index)
+                
+            months[MONTHS[month]] = aggregated_weeks
+
+        
+        return {
+            "z": months.values.tolist(),
+            "x": months.columns.tolist(),
+            "y": months.index.tolist()
+        }
 
 
-@st.cache()
-def get_weekly_spendings_heatmap(data: pd.DataFrame) -> go.Heatmap:
-    heatmap_object = weekly_spendings_data_filter(data)
+    @st.experimental_memo()
+    def get_weekly_spendings_heatmap(_self, data: pd.DataFrame) -> go.Figure:
+        heatmap_object = _self.weekly_spendings_data_filter(data)
 
-    hovertemplate = "Month: %{x},<br>Week: %{y},<br>Spending: %{z:.2f} KM<extra></extra>"
-    texttemplate = "%{z:.2f}"
+        texttemplate = "%{z:.2f}"
 
-    figure = go.Figure(data = go.Heatmap(
-        heatmap_object,
-        colorscale = "YlOrRd",
-        hovertemplate = hovertemplate,
-        texttemplate = texttemplate,
-    ))
+        figure = go.Figure(data = go.Heatmap(
+            heatmap_object,
+            colorscale = "YlOrRd",
+            hovertemplate = hovertemplate,
+            texttemplate = texttemplate,
+            xgap = 2,
+            ygap = 2
+        ))
 
-    figure.update_layout(
-        xaxis = dict(showgrid = False),
-        yaxis = dict(showgrid = False)
-    )
+        figure.update_layout(
+            xaxis = dict(showgrid = False),
+            yaxis = dict(showgrid = False),
+            hoverlabel = dict(bgcolor = "white"),
+        )
 
-    return figure
-
-
-def get_figure(data: pd.DataFrame) -> px.line:
-    fig = px.line(data, x="Date", y="Amount", markers = True)
-
-    fig.data[0].line.color = "#FF800B"
-
-    fig.update_layout(title_font_color = "#fff")
-
-    fig.layout.plot_bgcolor = "rgba(0, 0, 0, 0)"
-    fig.layout.paper_bgcolor = "rgba(0, 0, 0, 0)"
-
-    fig.layout.yaxis.color = "#fff"
-    fig.layout.xaxis.color = "#fff"
+        return figure
 
 
-    fig.update_traces(hovertemplate = hovertemplate)
+    def monthly_spendings_container(_self, data: pd.DataFrame, month: int):
+        planned = data[MONTHS[month]].sum()
+        actual = data["Spent"].sum()
+        
+        text = "{:.2f} / {:.2f}".format(actual, planned)
+        
+        return st.error(text) if actual > planned else st.success(text)
 
-    return fig
+    @st.experimental_memo()
+    def planner(_self, transactions: pd.DataFrame, month: int, year: int):
+        data = _self.__repository.fetch(_self.__workbook, 1)
 
-def monthly(data: pd.DataFrame, month: int):
-    
-    st.plotly_chart(get_weekly_spendings_heatmap(data), use_container_width = True)
+        planned = _self.__filter.spendings_statistics(data, transactions, MONTHS[month],  False)
 
-    transactions = filter.filter_by_date(data, month = month)
+        st.dataframe(planned, use_container_width = True)
 
-    with st.expander("Monthly Transactions", expanded = False):
-        st.dataframe(transactions)
+        spendings = st.columns([3, 1])
 
+        spendings[0].info(f"Spendings in { MONTHS[month] } for the monthly categories")
+        with spendings[1]:
+            _self.monthly_spendings_container(planned, month)
+                
 
-    monthly_aggregation = filter.group_by_date(transactions)
-    
-    figure = chart.line(monthly_aggregation, "Date", "Amount")
-    figure.update_traces(hovertemplate = hovertemplate)
-    figure.layout.title = f"Spendings by Day for { MONTHS[month] }"
+    @st.experimental_memo()
+    def report(_self, month: int, year: int):
+        data = _self.__repository.fetch(_self.__workbook, 0)
 
-    st.plotly_chart(figure, use_container_width = True)
+        heatmap = _self.get_weekly_spendings_heatmap(data)
+        heatmap.layout.title = f"Spendings for each Week in the Month for { year }"
+        heatmap.update_traces(hovertemplate = heatmap_hover_template)
 
-    
+        st.plotly_chart(heatmap, use_container_width = True)
+
+        transactions = _self.__filter.filter_by_date(data, month = month)
+
+        with st.expander(f"Transactions for { MONTHS[month] }", expanded = False):
+            st.dataframe(transactions)
+
+        monthly_aggregation = _self.__filter.group_by_date(transactions)
+        
+        figure = _self.__chart.line(monthly_aggregation, "Date", "Amount")
+        figure.update_traces(hovertemplate = hovertemplate)
+        figure.layout.title = f"Spendings by Day in { MONTHS[month] }"
+
+        st.plotly_chart(figure, use_container_width = True)
+
+        _self.planner(transactions, month, year)
+        
 
 
 

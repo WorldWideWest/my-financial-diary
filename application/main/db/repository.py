@@ -22,21 +22,21 @@ class Repository(BaseConfiguration):
     """
     __client = None
 
-    def __init__(self) -> None:
-        self.__authenticate__()
+    def __init__(_self) -> None:
+        _self.__authenticate__()
         super().__init__()
 
-    def __authenticate__(self):
+    def __authenticate__(_self):
         try:
             credentials = ServiceAccountCredentials.from_json_keyfile_dict(
-                self.CREDENTALS, self.SCOPES)
+                _self.CREDENTALS, _self.SCOPES)
 
-            self.__client  = gspread.authorize(credentials)
+            _self.__client = gspread.authorize(credentials)
         except Exception as e:
             print(f"Authentication failure: { str(e.args) }")
             
-    @st.cache()
-    def fetch(self, workbook: str, index: int) ->  pd.DataFrame:
+    @st.experimental_memo()
+    def fetch(_self, workbook: str, index: int) ->  pd.DataFrame:
         """
             The `fetch()` method is the prt of the Repository class which mimics a real
             repositorty. In our case the database is Google Sheets which is accessed through the Google Cloud Platform [API](https://console.cloud.google.com/marketplace/product/google/sheets.googleapis.com?q=search&referrer=search&project=personal-budget-diary).
@@ -47,13 +47,13 @@ class Repository(BaseConfiguration):
             The return of this method is a pandas DataFrame which contains records from the requsted worksheet.
         """
         try:
-            data = self.__client.open(workbook).get_worksheet(index).get_all_records()
+            data = _self.__client.open(workbook).get_worksheet(index).get_all_records()
             return pd.DataFrame(data)
         except Exception as e:
             print(f"Fetch failure: { str(e.args) }")
 
 
-    def migrate(self, workbook_name: str, model: BaseModel):
+    def migrate(_self, workbook_name: str, model: BaseModel):
         """
             The `migrate` method enables you to make a model and start the migration process which will then
             create a worksheet if it does not exists in the Workbook with all the required properties defined in
@@ -62,10 +62,10 @@ class Repository(BaseConfiguration):
         try:    
 
             columns = [column for column in model.columns() if column != "table_name"]
-            workbook = self.__client.open(workbook_name)
+            workbook = _self.__client.open(workbook_name)
 
             
-            if isinstance(self.try_open(workbook_name, model.table_name), WorksheetNotFound):
+            if isinstance(_self.try_open(workbook_name, model.table_name), WorksheetNotFound):
                 workbook.add_worksheet(model.table_name, 0, 0)
 
             worksheet = workbook.worksheet(model.table_name)
@@ -76,8 +76,8 @@ class Repository(BaseConfiguration):
         except Exception as e:
             raise e.args
 
-    def try_open(self, workbook: str, worksheet: str):
+    def try_open(_self, workbook: str, worksheet: str):
         try:
-            self.__client.open(workbook).worksheet(worksheet)
+            _self.__client.open(workbook).worksheet(worksheet)
         except WorksheetNotFound as e:
             return e.args

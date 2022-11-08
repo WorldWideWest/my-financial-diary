@@ -6,76 +6,117 @@ import plotly.express as px
 
 from main.utils.filter import Filter
 from main.utils.chart import Chart
+from main.db.repository import Repository
 
-chart = Chart()
-filter = Filter()
-WEEK = dt.date.today().isocalendar().week
-
-hovertemplate = "<span style='color: #fff;'><span style='font-weight: 700;'>Day: %{x}</span>,<br>Amount: %{y:.2f} KM</span><extra></extra>"
+from main.static.components.data import MONTHS
 
 
-def transactions_view(transactions: pd.DataFrame, week: int) -> st.container:
-    transactions_container = st.container()
-    transactions_container.markdown(f"<h3 style='text-align:center;'>All Transactions in the Week { week } of the Year</h3>", unsafe_allow_html = True)
-    transactions_container.dataframe(transactions, use_container_width = True)
 
-    return transactions_container
+
+class Weekly:
+
+    def __init__(_self, repository: Repository, filter: Filter, chart: Chart, workbook: str):
+        _self.__repository = repository
+        _self.__filter = filter
+        _self.__chart = chart
+        _self.__workbook = workbook
+
+        _self.get_data()
+
+    def set_year(_self, year: int):
+        _self.year = year
+
+    def set_month(_self, month: int):
+        _self.month = month
+        _self.set_month_name()
+
+    def set_month_name(_self):
+        _self.month_name = MONTHS[_self.month]
+
+    def set_week(_self, week: int):
+        _self.week = week
     
-def grouped_transactions_view(transactions: pd.DataFrame, grouped_transactions: pd.DataFrame, week: int) -> st.columns:
-    grouped_transactions_container = st.columns([1, 3])
-    grouped_transactions_container[0].markdown(f"<h6 style='text-align:center;'>Grouped Transactions by Category for the Week { WEEK } of the Month</h6>", unsafe_allow_html = True)
-    grouped_transactions_container[0].dataframe(grouped_transactions)
-    
-    transactions = filter.group_by_date(transactions)
+    def get_data(_self):
+        _self.data = _self.__repository.fetch(_self.__workbook, 0)
+        _self.planned = _self.__repository.fetch(_self.__workbook, 1)
 
-    figure = chart.line(transactions, "Date", "Amount")
-    figure.update_traces(hovertemplate = hovertemplate)
-    figure.layout.title = f"Spendings by Day for the Week { week }"
+    def get_required_container(_self, data: pd.DataFrame) -> dict:
+        text = ""
 
-    grouped_transactions_container[1].plotly_chart(figure, use_container_width = True)
+        if not isinstance(_self.__filter.try_get_column(data, _self.month_name) , KeyError):
+            planned = data[_self.month_name].sum()
+            actual = data["Spent"].sum()
 
-    return grouped_transactions_container
+            text = "{:.2f} / {:.2f}".format(actual, planned)
 
-def get_required_container(transactions: pd.DataFrame):
-    actual_spendings = transactions["Amount"].sum()
-    
-    # Insted of 50, we want the value for the devidable categories devided by 4 (4 stands for the weeks in the month) 
-    
-    if(actual_spendings > 50):
-        return st.error(f"{ actual_spendings } / { 50 }")
-    return st.success(f"{ actual_spendings } / { 50 }")
+            return {"status": "error", "content": text} if actual > planned else {"status": "success", "content": text}
 
-def planned_spendings_info_view(transactions: pd.DataFrame) -> st.columns:
-    planned_spending_container = st.columns([3, 1])
-    planned_spending_container[0].info(f"Planned and Actual spendings for the week { WEEK }")
+        return {"status": "error", "content": text}
+    def get_spendings_info_component(_self, data: pd.DataFrame) -> st.columns:
+        planned_spending_container = st.columns([3, 1])
+        planned_spending_container[0].info(f"Planned and Actual spendings for the week { _self.week } in { _self.month_name }")
 
-    with planned_spending_container[1]:
-        get_required_container(transactions)
+        result = _self.get_required_container(data)
+        
+        if result["status"] == "error":
+            planned_spending_container[1].error(result["content"])
+        else:
+            planned_spending_container[1].success(result["content"])
 
-    return planned_spending_container
+        return planned_spending_container
 
-def weekly(data: pd.DataFrame, year: int = None, month: int = None, week: int = None) -> pd.DataFrame:
-    """
-        Make sure that the data is a copy of the dataframe and not 
-        the original object that is fetched from Google Sheets API.
+    def get_filtered_transactions_dataframe(_self, transactions: pd.DataFrame):
+        expander = st.expander(f"All Transactions for Week { _self.week } in { _self.month_name } ", expanded = False)
+        expander.dataframe(transactions, use_container_width = True)
+        
+        return expander
 
-        To do that on passing the `data` argument to the function add
-        the pandas method copy() in front of it to make sure that the 
-        DataFrame was in fact copied.
-    """
-    
-    filtered = data.copy()
+    def get_spendings_by_day_chart(_self, transactions: pd.DataFrame):
+        hovertemplate = "<span style='color: #fff;'><span style='font-weight: 700;'>Day: %{x}</span>,<br>Amount: %{y:.2f} KM</span><extra></extra>"
 
-    filtered["Date"] = pd.to_datetime(filtered["Date"], format="%m/%d/%Y")
+        figure = _self.__chart.line(transactions, "Date", "Amount")
 
-    transactions = filter.filter_by_date(filtered, year = year, month = month, week = week)
-    grouped = filter.group_by_category(transactions)
+        figure.update_traces(hovertemplate = hovertemplate)
+        figure.layout.title = f"Spendings by Day for Week { _self.week } in { _self.month_name }"
 
-    with st.expander("Transactions", expanded = True):
-        transactions_view(transactions, week)
+        return st.plotly_chart(figure, use_container_width = True)
 
-    grouped_transactions_view(transactions, grouped, week)
+    def get_grouped_spendings_for_week_dataframe(_self, data: pd.DataFrame):
+        container = st.container()
+        container.markdown(f"<h6 style='text-align:left;'>Grouped Transactions by Category</br>for Week { _self.week } in { _self.month_name }</h6>", unsafe_allow_html = True)
+        container.dataframe(data)
 
-    planned_spendings_info_view(transactions)
+        return container
+
+    def get_spending_statistics_dataframe(_self, statistics):
+        return st.dataframe(statistics) 
+
+    def process(_self) -> pd.DataFrame:
+        transactions = _self.__filter.filter_by_date(_self.data, year = _self.year, month = _self.month, week = _self.week)
+        grouped_by_category = _self.__filter.group_by_category(transactions)
+
+        grouped_by_date = _self.__filter.group_by_date(transactions)        
+
+        planned = _self.__filter.spendings_statistics(_self.planned, transactions, _self.month_name, True)
+        
+        _self.render(transactions, grouped_by_category, grouped_by_date, planned)
+
+    def render(_self, transactions: pd.DataFrame, grouped_by_category: pd.DataFrame, grouped_by_date: pd.DataFrame, planned: pd.DataFrame):
+        
+        _self.get_filtered_transactions_dataframe(transactions)
+
+        _self.get_spendings_by_day_chart(grouped_by_date)
+
+        columns = st.columns([2, 2])
+        with columns[0]:
+            _self.get_grouped_spendings_for_week_dataframe(grouped_by_category)
+        with columns[1]:
+            _self.get_spending_statistics_dataframe(planned)
+
+        _self.get_spendings_info_component(planned)
+
+
+
+
 
 

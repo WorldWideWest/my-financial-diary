@@ -5,6 +5,7 @@ import streamlit as st
 
 from .db.repository import Repository
 from .db.models.income import IncomeModel
+from .configuration import BaseConfiguration
 
 WORKBOOK = os.environ.get("WORKBOOK")
 
