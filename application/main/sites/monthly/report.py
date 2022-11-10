@@ -9,8 +9,6 @@ from main.sites.base.base_report import BaseReport
 
 from main.static.components.data import MONTHS
 
-hovertemplate = "<span style='color: #fff;'><span style='font-weight: 700;'>Day: %{x}</span>,<br>Amount: %{y:.2f} KM</span><extra></extra>"
-heatmap_hover_template = "<span style='background-color: #fff; color: #001024;'>Month: %{x},<br>Week: %{y},<br>Spending: %{z:.2f} KM</span><extra></extra>"
 
 class Monthly(BaseReport):
 
@@ -19,6 +17,12 @@ class Monthly(BaseReport):
         _self.__repository = repository
         _self.__filter = filter
         _self.__chart = chart
+
+        _self.get_data()
+
+    def get_data(_self):
+        _self.data = _self.__repository.fetch(_self.__workbook, 0)
+        _self.planned = _self.__repository.fetch(_self.__workbook, 1)
 
     @st.experimental_memo()
     def weekly_spendings_data_filter(_self, data: pd.DataFrame) -> dict: 
@@ -34,19 +38,18 @@ class Monthly(BaseReport):
                 
             months[MONTHS[month]] = aggregated_weeks
 
-        
         return {
             "z": months.values.tolist(),
             "x": months.columns.tolist(),
             "y": months.index.tolist()
         }
 
-
     @st.experimental_memo()
     def get_weekly_spendings_heatmap(_self, data: pd.DataFrame) -> go.Figure:
         heatmap_object = _self.weekly_spendings_data_filter(data)
 
         texttemplate = "%{z:.2f}"
+        hovertemplate = "<span style='background-color: #fff; color: #001024;'>Month: %{x},<br>Week: %{y},<br>Spending: %{z:.2f} KM</span><extra></extra>"
 
         figure = go.Figure(data = go.Heatmap(
             heatmap_object,
@@ -65,57 +68,62 @@ class Monthly(BaseReport):
 
         return figure
 
+    def get_required_container(_self, data: pd.DataFrame):
+        text = f"No Statistics Available for { _self.month_name }"
 
-    def monthly_spendings_container(_self, data: pd.DataFrame, month: int):
-        planned = data[MONTHS[month]].sum()
-        actual = data["Spent"].sum()
+        if not isinstance(_self.__filter.try_get_column(data, _self.month_name), KeyError):
+            planned = data[_self.month_name].sum()
+            actual = data["Spent"].sum()
+
+            text = "{:.2f} / {:.2f}".format(actual, planned)
+
+            return {"status": "error", "content": text} if actual > planned else {"status": "success", "content": text}
+
+        return {"status": "error", "content": text}
+    
+    def get_spendings_info_component(_self, data: pd.DataFrame) -> st.columns:
+        planned_spending_container = st.columns([3, 1])
+        planned_spending_container[0].info(f"Planned and Actual spendings for the week { _self.week } in { _self.month_name }")
+
+        result = _self.get_required_container(data)
         
-        text = "{:.2f} / {:.2f}".format(actual, planned)
+        if result["status"] == "error":
+            planned_spending_container[1].error(result["content"])
+        else:
+            planned_spending_container[1].success(result["content"])
+
+        return planned_spending_container
+    
+    def process(_self):
+
+        heatmap = _self.get_weekly_spendings_heatmap(_self.data)
+        heatmap.layout.title = f"Spendings for each Week in the Month for { _self.year }"
+
+        transactions = _self.__filter.filter_by_date(_self.data, month = _self.month)
+
+        spendings_by_day = _self.__filter.group_by_date(transactions)
+        spendings_by_day_chart = _self.__chart.line(spendings_by_day, "Date", "Amount")
+
+        hovertemplate = "<span style='color: #fff;'><span style='font-weight: 700;'>Day: %{x}</span>,<br>Amount: %{y:.2f} KM</span><extra></extra>"
+        spendings_by_day_chart.update_traces(hovertemplate = hovertemplate)
+        spendings_by_day_chart.layout.title = f"Spendings by Day in { _self.month_name }"
+
+        planned = _self.__filter.spendings_statistics(_self.planned, transactions, _self.month_name,  False)
+
+        _self.render(heatmap, transactions, spendings_by_day_chart, planned)
+
+
+    def render(_self, heatmap: go.Figure, transactions: pd.DataFrame, spendings_by_day: go.Figure, planned: pd.DataFrame):
         
-        return st.error(text) if actual > planned else st.success(text)
+        st.plotly_chart(heatmap, use_container_width = True)
 
-    @st.experimental_memo()
-    def planner(_self, transactions: pd.DataFrame, month: int, year: int):
-        data = _self.__repository.fetch(_self.__workbook, 1)
+        with st.expander(f"Transactions for { _self.month_name }", expanded = False):
+            st.dataframe(transactions)
 
-        planned = _self.__filter.spendings_statistics(data, transactions, MONTHS[month],  False)
+        st.plotly_chart(spendings_by_day, use_container_width = True)
 
         st.dataframe(planned, use_container_width = True)
 
-        spendings = st.columns([3, 1])
-
-        spendings[0].info(f"Spendings in { MONTHS[month] } for the monthly categories")
-        with spendings[1]:
-            _self.monthly_spendings_container(planned, month)
-                
-
-    @st.experimental_memo()
-    def report(_self, month: int, year: int):
-        data = _self.__repository.fetch(_self.__workbook, 0)
-
-        heatmap = _self.get_weekly_spendings_heatmap(data)
-        heatmap.layout.title = f"Spendings for each Week in the Month for { year }"
-        heatmap.update_traces(hovertemplate = heatmap_hover_template)
-
-        st.plotly_chart(heatmap, use_container_width = True)
-
-        transactions = _self.__filter.filter_by_date(data, month = month)
-
-        with st.expander(f"Transactions for { MONTHS[month] }", expanded = False):
-            st.dataframe(transactions)
-
-        monthly_aggregation = _self.__filter.group_by_date(transactions)
-        
-        figure = _self.__chart.line(monthly_aggregation, "Date", "Amount")
-        figure.update_traces(hovertemplate = hovertemplate)
-        figure.layout.title = f"Spendings by Day in { MONTHS[month] }"
-
-        st.plotly_chart(figure, use_container_width = True)
-
-        _self.planner(transactions, month, year)
-        
-
-
-
+        _self.get_spendings_info_component(planned)
 
     

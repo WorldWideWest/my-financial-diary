@@ -9,11 +9,6 @@ from main.utils.chart import Chart
 from main.db.repository import Repository
 from main.sites.base.base_report import BaseReport
 
-from main.static.components.data import MONTHS
-
-
-
-
 class Weekly(BaseReport):
 
     def __init__(_self, repository: Repository, filter: Filter, chart: Chart, workbook: str):
@@ -29,9 +24,9 @@ class Weekly(BaseReport):
         _self.planned = _self.__repository.fetch(_self.__workbook, 1)
 
     def get_required_container(_self, data: pd.DataFrame) -> dict:
-        text = ""
+        text = f"No Statistics Available for { _self.month_name }"
 
-        if not isinstance(_self.__filter.try_get_column(data, _self.month_name) , KeyError):
+        if not isinstance(_self.__filter.try_get_column(data, _self.month_name), KeyError):
             planned = data[_self.month_name].sum()
             actual = data["Spent"].sum()
 
@@ -40,6 +35,7 @@ class Weekly(BaseReport):
             return {"status": "error", "content": text} if actual > planned else {"status": "success", "content": text}
 
         return {"status": "error", "content": text}
+
     def get_spendings_info_component(_self, data: pd.DataFrame) -> st.columns:
         planned_spending_container = st.columns([3, 1])
         planned_spending_container[0].info(f"Planned and Actual spendings for the week { _self.week } in { _self.month_name }")

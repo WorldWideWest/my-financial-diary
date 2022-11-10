@@ -52,5 +52,10 @@ def main_site(data: pd.DataFrame, planned: pd.DataFrame):
     with tabs_component[1]: # Monthly Site
         from main.sites.monthly.report import Monthly
         monthly = Monthly(Repository(), Filter(), Chart(), WORKBOOK)
-        monthly.report(month, year)
+
+        monthly.set_year(year)
+        monthly.set_month(month)
+        monthly.set_week(week)
+
+        monthly.process()
 
