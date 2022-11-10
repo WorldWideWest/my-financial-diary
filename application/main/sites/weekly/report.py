@@ -7,13 +7,14 @@ import plotly.express as px
 from main.utils.filter import Filter
 from main.utils.chart import Chart
 from main.db.repository import Repository
+from main.sites.base.base_report import BaseReport
 
 from main.static.components.data import MONTHS
 
 
 
 
-class Weekly:
+class Weekly(BaseReport):
 
     def __init__(_self, repository: Repository, filter: Filter, chart: Chart, workbook: str):
         _self.__repository = repository
@@ -22,19 +23,6 @@ class Weekly:
         _self.__workbook = workbook
 
         _self.get_data()
-
-    def set_year(_self, year: int):
-        _self.year = year
-
-    def set_month(_self, month: int):
-        _self.month = month
-        _self.set_month_name()
-
-    def set_month_name(_self):
-        _self.month_name = MONTHS[_self.month]
-
-    def set_week(_self, week: int):
-        _self.week = week
     
     def get_data(_self):
         _self.data = _self.__repository.fetch(_self.__workbook, 0)

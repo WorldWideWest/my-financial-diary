@@ -2,16 +2,17 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 
-from main.static.components.data import MONTHS
 from main.utils.filter import Filter
 from main.utils.chart import Chart
 from main.db.repository import Repository
+from main.sites.base.base_report import BaseReport
 
+from main.static.components.data import MONTHS
 
 hovertemplate = "<span style='color: #fff;'><span style='font-weight: 700;'>Day: %{x}</span>,<br>Amount: %{y:.2f} KM</span><extra></extra>"
 heatmap_hover_template = "<span style='background-color: #fff; color: #001024;'>Month: %{x},<br>Week: %{y},<br>Spending: %{z:.2f} KM</span><extra></extra>"
 
-class Monthly:
+class Monthly(BaseReport):
 
     def __init__(_self, repository: Repository, filter: Filter, chart: Chart, workbook: str) -> None:
         _self.__workbook = workbook
