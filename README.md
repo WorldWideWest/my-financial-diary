@@ -28,3 +28,11 @@ This module will show the user how much has he/she spent over the week with grap
 - Income statistics of the current month, where we also can see the planned savings and the actual savings.
   - Bar Chart by category spent and remaining budget
   - Weekly reporter for each category
+  
+ 
+ - NEXT IMPROVEMENTS
+  - Filling the data from google sheets into a real database (sqlite3)
+  - Adding Form support for:
+    - Adding the transaction to the database
+    - Planning the spendings for the month
+  
