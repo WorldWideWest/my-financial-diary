@@ -1,0 +1,29 @@
+version: "3.9"
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    env_file:
+      - docker.env
+    ports:
+      - '5432:5432'
+    networks:
+      - financial-diary-network
+
+  api:
+    container_name: financial-diary-api
+    depends_on:
+      - postgres
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8000:8000'
+      - '5678:5678'
+    networks:
+      - financial-diary-network
+    command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 -m uvicorn application:app --host 0.0.0.0 --port 8000 --reload"]
+
+networks:
+  financial-diary-network:
+    name: financial-diary-network

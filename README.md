@@ -1,38 +1,30 @@
 # My Financial Dairy
 
-## Modules
+## General information
 
-The software will consist of 3 main modules:
+The financial dairy project is a FinTech app that tracks user expenses and delivers analytics of the expenses so the user can have an overview of his financial situation. The main features will be that the user has tracking of the expenses by time (weekly, monthly, yearly and total). To get that data in the first phase will have a form for the user to fill consisting of basic data that is needed to accuratly track the expenses and then delvier reports on the data.
 
-1. Weekly reporting module
-2. Monthly reporting module
-3. Yearly reporting module
-4. Emailing module
-5. Document Generator module
+The application will have oAuth2 implementation so the use can login with his Google, Facbook, Microsoft account. 
 
-## Weekly Reporting module
+Once the user has logged in he can see his expenses over time (weekly, monthly, yearly and total) and also will have theses expense sperated into categoris (food, job, furniture, other...). 
 
-This module will show the user how much has he/she spent over the week with graphs for the whole week. Also the user will see the KPI's like:
+The user will also have an option to report the data on his email or other devices that will come in a descriptive form so the user can understand how much money he spents on differnet kinds of things.
 
-1. Cash flow in the week (How much cash is needed in the week)
-2. Categories where the most money is spent
-3. How much of the weekly budget has been spent
-4. How much money has he/she saved on things
+The features will be covered in the documentation down below once the development on those features starts.
 
-## Mondthly Reporting & Planning module
+The technologies used for this project will be FastApi for the backend and SvelteKit for the fronted, the infrastructure will run on docker containers and will use GitHub Actions to automate our CI/CD pipeline.
 
-- We want to create a monthly budget planner wehere we plann out each categry, how much money has each category to spend.
+## How to run the project on your local machine
 
-- Want to anlyze the data by weeks and determine how much cash do I need weekly. For this will create the table where we will sum spendings by each week in every month.
+### Backend
 
-- Income statistics of the current month, where we also can see the planned savings and the actual savings.
-  - Bar Chart by category spent and remaining budget
-  - Weekly reporter for each category
-  
- 
- - NEXT IMPROVEMENTS
-  - Filling the data from google sheets into a real database (sqlite3)
-  - Adding Form support for:
-    - Adding the transaction to the database
-    - Planning the spendings for the month
-  
+After the integration of docker-compose and vscode is done will describe the whole proces of setting up backend. This is important to finish because we want you to have the best possible development experience so the configuration of the tools is very important and will describe it here once the ticket:
+- Setting up docker-compose with VS Code debugger
+
+
+### Frontend
+
+Once the configuration of the frontend is done will describe it here....
+
+
+Stay tuned....
