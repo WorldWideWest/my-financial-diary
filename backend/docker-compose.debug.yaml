@@ -14,6 +14,9 @@ services:
     container_name: api
     depends_on:
       - postgres
+
+    env_file:
+      - docker.env
     build:
       context: .
       dockerfile: Dockerfile

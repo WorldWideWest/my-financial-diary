@@ -1,21 +1,19 @@
 from fastapi import FastAPI
 
-from src.database import DbConfig
-
-
+from src.configuration import BaseConfiguration
+from src.database import engine
 
 app = FastAPI()
-db = DbConfig()
 
 @app.get("/")
 async def get_world() -> dict:
 
+    
+    engine
 
     context = {
         "message": "Hello World", 
         "author": "Dzeno",
-        "connection_string": db.get_connection_string()
-        
     }
 
     return context

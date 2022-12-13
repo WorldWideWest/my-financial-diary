@@ -1,17 +1,7 @@
+from sqlalchemy import create_engine
+
 from src.configuration import BaseConfiguration
 
-"""
-from sqlalchemy import URL
+config = BaseConfiguration()
 
-engine = create_engine("postgresql+psycopg2://scott:tiger@localhost/mydatabase")
-
-)
-"""
-class DbConfig(BaseConfiguration):
-
-
-    def get_connection_string(self):
-        return f"postgresql+psycopg2://{ self.POSTGRES_USER }:{ self.POSTGRES_PASSWORD }@{ self.POSTGRES_HOST }/{ self.POSTGRES_DB }"
-
-
-
+engine = create_engine(config.SQLALCHEMY_DATABASE_URL)
