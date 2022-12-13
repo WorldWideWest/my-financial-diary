@@ -11,9 +11,12 @@ services:
       - financial-diary-network
 
   api:
-    container_name: financial-diary-api
+    container_name: api
     depends_on:
       - postgres
+
+    env_file:
+      - docker.env
     build:
       context: .
       dockerfile: Dockerfile
@@ -22,8 +25,20 @@ services:
       - '5678:5678'
     networks:
       - financial-diary-network
-    command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 -m uvicorn application:app --host 0.0.0.0 --port 8000 --reload"]
+    
+    volumes:
+      - .:/app
+      - postgres_data:/var/lib/postgresql/data
+
+    command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 -m uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"]
+
+
+volumes: 
+  postgres_data:
+    driver: local
 
 networks:
   financial-diary-network:
     name: financial-diary-network
+
+  
