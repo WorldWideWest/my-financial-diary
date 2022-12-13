@@ -10,10 +10,15 @@ You can run the application in multiple ways:
 
 2. The second way is using `docker-compose`, before we run the command make sure you have docker.env file which will load the environment variables set in `docker-compose.debug.yaml` file, for now the variables are:
 
-   ```txt
-   POSTGRES_USER=admin
-   POSTGRES_PASSWORD=admin
-   POSTGRES_DB=financial-dairy-db
+   ```bash
+   ENVIRONMENT=development
+   DB_DIALECT=postgresql
+   DB_DRIVER=psycopg2
+   DB_PORT=5432
+   DB_USER=admin
+   DB_PASSWORD=admin
+   DB_NAME=financial-dairy-db
+   DB_HOST=localhost
    ```
 
    but in the future the list will expand and you can track here what variables are needed so you can update your local `docker.env` file.
