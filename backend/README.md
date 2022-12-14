@@ -15,9 +15,9 @@ You can run the application in multiple ways:
    DB_DIALECT=postgresql
    DB_DRIVER=psycopg2
    DB_PORT=5432
-   DB_USER=admin
-   DB_PASSWORD=admin
-   DB_NAME=financial-dairy-db
+   POSTGRES_USER=admin
+   POSTGRES_PASSWORD=admin
+   POSTGRES_DB=financial-dairy-db
    DB_HOST=localhost
    ```
 
