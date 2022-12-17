@@ -32,3 +32,11 @@ You can run the application in multiple ways:
    once you have done that return to VS Code and then go into the debugger and select the option `Python: Remote Attach to FastApi` and then run the application.
 
    Now your local development environment is ready to start developing apis for the application.
+
+## Development
+
+### Phase One: Setup the auth system for the application
+
+In this phase we want to setup oAuth2 authentication standard so in the future we can provide the user with the options to login with different accounts like Google, Facebook, Microsoft, Apple etc.
+
+Also when the user is registered we want to send a confirmation email so we assure that email is real.
