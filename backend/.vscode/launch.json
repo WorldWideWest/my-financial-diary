@@ -1,46 +1,41 @@
 {
-    "version": "0.2.0",
-    "configurations": [
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Remote Attach to FastApi",
+      "type": "python",
+      "request": "attach",
+      "port": 5678,
+      "host": "localhost",
+      "pathMappings": [
         {
-            "name": "Python: Remote Attach to FastApi",
-            "type": "python",
-            "request": "attach",
-            "port": 5678,
-            "host": "localhost",
-            "pathMappings": [
-                {
-                    "localRoot": "${workspaceFolder}",
-                    "remoteRoot": "/app"
-                }
-            ]
-        },
-        {
-            "name": "Python: FastAPI",
-            "type": "python",
-            "request": "launch",
-            "module": "uvicorn",
-            "args": [
-                "application:app",
-                "--port",
-                "8000",
-                "--reload"
-            ],
-            "jinja": false
-        },
-        {
-            "name": "Docker: Python - Fastapi",
-            "type": "docker",
-            "request": "launch",
-            "preLaunchTask": "docker-run: debug",
-            "python": {
-                "pathMappings": [
-                    {
-                        "localRoot": "${workspaceFolder}",
-                        "remoteRoot": "/app"
-                    }
-                ],
-                "projectType": "fastapi"
-            }
+          "localRoot": "${workspaceFolder}",
+          "remoteRoot": "/app"
         }
-    ]
+      ]
+    },
+    {
+      "name": "Python: FastAPI",
+      "type": "python",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["application:app", "--port", "8000", "--reload"],
+      "jinja": false
+    },
+    {
+      "name": "Docker: Python - Fastapi",
+      "type": "docker",
+      "request": "launch",
+      "preLaunchTask": "docker-run: debug",
+      "python": {
+        "pathMappings": [
+          {
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "/app"
+          }
+        ],
+        "projectType": "fastapi"
+      }
+    }
+  ]
 }
